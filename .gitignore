@@ -1,4 +1,3 @@
-*.aux
-*.log
-*.pdf
-*/auto
+_site
+.sass-cache
+.jekyll-metadata
