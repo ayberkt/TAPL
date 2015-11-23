@@ -1,0 +1,23 @@
+\documentclass{article}
+\usepackage{color}
+\usepackage{bussproofs}
+
+\begin{document}
+
+\paragraph{Exercise 3.3.4}
+\color{red} TODO \color{black}
+
+\paragraph{Exercise 3.5.5}
+Proof 3.3.4 uses structural induction.
+
+\paragraph{Exercise 3.5.10}
+
+\AxiomC{$t \longrightarrow t'$}
+\UnaryInfC{$t \longrightarrow^* t'$}
+\DisplayProof
+\hspace{3em}
+\AxiomC{$t \longrightarrow^* t'$}
+\AxiomC{$t' \longrightarrow^* t''$}
+\BinaryInfC{$t \longrightarrow^* t''$}
+\DisplayProof
+\end{document}
