@@ -5,7 +5,7 @@ module Parser where
 -- import qualified Semantics as S
 import           Prelude                             hiding (pred, succ)
 import           Semantics                           (Term (..))
-import           Text.ParserCombinators.Parsec       (Parser (..), char, parse,
+import           Text.ParserCombinators.Parsec       (Parser(..), char, parse,
                                                       string, skipMany, (<|>), space)
 
 term ∷ Parser Term
