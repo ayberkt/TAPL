@@ -3,11 +3,12 @@ module Main where
 
 import System.IO (putStr, hFlush, getLine, stdout)
 import Parser (parseString)
+import Semantics (eval)
 
 main ∷ IO ()
 main = do
   putStr "λ "
   hFlush stdout
   input ← getLine
-  putStrLn $ show (parseString input)
+  putStrLn $ show (eval $ parseString input)
   main

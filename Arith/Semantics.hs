@@ -9,7 +9,17 @@ data Term = TmTrue
           | TmSucc Term
           | TmPred Term
           | TmIsZero Term
-          deriving (Show)
+
+digitize ∷ Term → Int
+digitize TmZero     = 0
+digitize (TmSucc t) = 1 + digitize t
+
+instance Show Term where
+  show TmTrue         = "true"
+  show TmFalse        = "false"
+  show TmZero         = "0"
+  show num@(TmSucc t) = show $ digitize num
+
 
 isNumericVal ∷ Term → Term
 isNumericVal TmZero     = TmTrue
@@ -21,20 +31,17 @@ isVal TmTrue  = TmTrue
 isVal TmFalse = TmTrue
 isVal t       = isNumericVal t
 
-eval₁ (TmIf TmTrue  t₂ t₃)   = t₂
-eval₁ (TmIf TmFalse t₂ t₃)   = t₃
-eval₁ (TmIf t₁      t₂ t₃)   = let t₁' = eval₁ t₁
+eval ∷ Term → Term
+eval (TmIf TmTrue  t₂ t₃)   = t₂
+eval (TmIf TmFalse t₂ t₃)   = t₃
+eval (TmIf t₁      t₂ t₃)   = let t₁' = eval t₁
                                in TmIf t₁' t₂ t₃
-eval₁ (TmSucc t₁)            = let t₁' = eval₁ t₁
+eval (TmSucc t₁)            = let t₁' = eval t₁
                                in TmSucc t₁'
-eval₁ (TmPred TmZero)        = TmZero
-eval₁ (TmPred (TmSucc nv₁))  = nv₁
-eval₁ (TmPred t₁)            = let t₁' = eval₁ t₁
+eval (TmPred TmZero)        = TmZero
+eval (TmPred (TmSucc nv₁))  = nv₁
+eval (TmPred t₁)            = let t₁' = eval t₁
                                in TmPred t₁'
-eval₁ (TmIsZero TmZero)      = TmTrue
-eval₁ (TmIsZero  _)          = TmFalse
-eval₁ (TmIsZero t₁)          = let t₁' = eval₁ t₁
-                               in TmIsZero t₁'
-
-eval t = let t' = eval₁ t
-         in eval t'
+eval (TmIsZero TmZero)      = TmTrue
+eval (TmIsZero  _)          = TmFalse
+eval t = t
