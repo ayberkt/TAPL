@@ -1,6 +1,6 @@
 {-# LANGUAGE UnicodeSyntax #-}
 
-module Arithmetic where
+module Semantics (Term(..), isNumericVal, isVal, eval) where
 
 data Term = TmTrue
           | TmFalse
