@@ -48,14 +48,12 @@ zero = do
 
 succ ∷ Parser Term
 succ = do
-  skipMany $ char ' '
   string "succ"
   t ← term
   return $ TmSucc t
 
 pred ∷ Parser Term
 pred = do
-  skipMany $ char ' '
   string "pred"
   t ← term
   return $ TmPred t
