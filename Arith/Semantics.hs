@@ -9,6 +9,7 @@ data Term = TmTrue
           | TmSucc Term
           | TmPred Term
           | TmIsZero Term
+          deriving (Show)
 
 isNumericVal ∷ Term → Term
 isNumericVal TmZero     = TmTrue

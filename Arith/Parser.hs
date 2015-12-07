@@ -3,21 +3,23 @@
 module Parser where
 
 -- import qualified Semantics as S
-import Prelude hiding (succ, pred)
-import Semantics(Term(..))
-import Text.ParserCombinators.Parsec ((<|>), string, char, Parser(..))
+import           Prelude                             hiding (pred, succ)
+import           Semantics                           (Term (..))
+import           Text.ParserCombinators.Parsec       (Parser (..), char, parse,
+                                                      string, skipMany, (<|>), space)
 
 term ∷ Parser Term
-term =  zero
-    <|> succ
-    <|> pred
-    <|> iszero
+term = do
+    skipMany space
+    t ← zero <|> value <|> conditional <|> iszero
+    skipMany space
+    return t
 
 value ∷ Parser Term
-value = true <|> false <|> numericVal
+value = true <|> false <|> numericValue
 
-numericVal ∷ Parser Term
-numericVal = zero <|> pred <|> succ
+numericValue ∷ Parser Term
+numericValue = zero <|> pred <|> succ
 
 true ∷ Parser Term
 true = do
@@ -46,12 +48,14 @@ zero = do
 
 succ ∷ Parser Term
 succ = do
+  skipMany $ char ' '
   string "succ"
   t ← term
   return $ TmSucc t
 
 pred ∷ Parser Term
 pred = do
+  skipMany $ char ' '
   string "pred"
   t ← term
   return $ TmPred t
@@ -61,3 +65,8 @@ iszero = do
   string "iszero"
   t ← term
   return $ TmIsZero t
+
+parseString :: [Char] -> Term
+parseString str = case parse term "" str of
+                    Left  e → error $ show e
+                    Right r → r
