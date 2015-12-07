@@ -2,11 +2,17 @@
 
 module Parser where
 
--- import qualified Semantics as S
-import           Prelude                             hiding (pred, succ)
+import           Prelude                             hiding ( pred
+                                                            , succ)
 import           Semantics                           (Term (..))
-import           Text.ParserCombinators.Parsec       (Parser(..), char, parse,
-                                                      string, skipMany, (<|>), space)
+import           Text.ParserCombinators.Parsec       ( Parser(..)
+                                                     , ParseError
+                                                     , char
+                                                     , parse
+                                                     , string
+                                                     , skipMany
+                                                     , (<|>)
+                                                     , space)
 
 term ∷ Parser Term
 term = do
@@ -64,7 +70,5 @@ iszero = do
   t ← term
   return $ TmIsZero t
 
-parseString :: [Char] -> Term
-parseString str = case parse term "" str of
-                    Left  e → error $ show e
-                    Right r → r
+parseString ∷ [Char] -> Either ParseError Term
+parseString input = parse term "" input

@@ -10,5 +10,7 @@ main = do
   putStr "λ "
   hFlush stdout
   input ← getLine
-  putStrLn $ show (eval $ parseString input)
+  case parseString input of
+    Left  e → putStrLn . show $ e
+    Right t → putStrLn . show . eval $ t
   main
