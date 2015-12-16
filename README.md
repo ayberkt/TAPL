@@ -15,4 +15,7 @@
     - Implementations are in `master`.
 * Chapter 5
     - [x] 5.2.1
-    
+    - [x] 5.2.2
+    - [ ] 5.2.3
+    - [ ] 5.2.4
+    - [x] 5.2.5
