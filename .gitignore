@@ -3,3 +3,5 @@
 *.pdf
 */auto
 .stack-work
+_site
+.sass-cache
