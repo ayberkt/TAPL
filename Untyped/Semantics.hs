@@ -17,13 +17,16 @@ data Term = TmVar Int         -- The representation of a variable is
           deriving (Eq, Ord, Show)
 
 printtm ∷ Context → Term → IO ()
+printtm ctx (TmVar n) = if length ctx == n
+                        then putStrLn (indexToName n)
+                        else putStrLn "[bad index]"
 printtm ctx (TmAbs x t) = let (ctx', x') = pickfreshname ctx x
-                              out = concat [ "(lambda "
-                                           , show x
-                                           , ". "
-                                           , show ctx'
-                                           , show t
-                                           , show ")"]
+                              out        = concat [ "(lambda "
+                                                  , show x
+                                                  , ". "
+                                                  , show ctx'
+                                                  , show t
+                                                  , show ")"]
                         in putStrLn out
 printtm ctx (TmApp t₁ t₂) = let out = concat [ "("
                                              , show ctx
@@ -32,12 +35,9 @@ printtm ctx (TmApp t₁ t₂) = let out = concat [ "("
                                              , show t₁
                                              , ")" ]
                             in putStrLn out
-printtm ctx (TmVar n) = if length ctx == n
-                        then putStrLn (indexToName n)
-                        else putStrLn "[bad index]"
 
 pickfreshname ∷ Context → String → (Context, String )
-pickfreshname = undefined
+pickfreshname ctx x = undefined
 
 indexToName ∷ Int → String
 indexToName = undefined
