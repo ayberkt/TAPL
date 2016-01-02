@@ -1,36 +1,46 @@
 {-# LANGUAGE UnicodeSyntax #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 module Semantics where
 
-type Binding = NameBind
+data Binding = NameBind deriving (Eq, Ord, Show)
 
 type Context = [(String, Binding)]
 
-data Term = TmVar Int  -- The representation of a variable is just a number.
-          | TmAbs Term -- The representation of an abstraction carries just a
-                       -- just a subterm for the abstraction's body.
-          | TmApp Term Term -- An application carries the two subterms
-                            -- being applied.
+data Term = TmVar Int         -- The representation of a variable is
+                              -- just a number.
+          | TmAbs String Term -- The representation of an abstraction
+                              -- carries just a subterm for the
+                              -- abstraction's body.
+          | TmApp Term Term   -- An application carries the two subterms
+                              -- being applied.
+          deriving (Eq, Ord, Show)
 
-printtm ∷ Term → IO ()
-printtm ctx (TmAbs t) = let (ctx', x') = pickfreshname ctx x
-                        in putStrLn "(lambda " ++ (show x)
-                                               ++ ". "
-                                               ++ (show ctx')
-                                               ++ (show t)
-                                               ++ (show ")")
-printtm ctx (TmApp t₁ t₂) = putStrLn "(" ++ (show ctx)
-                                        ++ (show t₁)
-                                        ++ " "
-                                        ++ (show ctx)
-                                        ++ (show t₁)
-                                        ++ ")"
+printtm ∷ Context → Term → IO ()
+printtm ctx (TmAbs x t) = let (ctx', x') = pickfreshname ctx x
+                              out = concat [ "(lambda "
+                                           , (show x)
+                                           , ". "
+                                           , (show ctx')
+                                           , (show t)
+                                           , (show ")")]
+                        in putStrLn out
+printtm ctx (TmApp t₁ t₂) = let out = concat [ "("
+                                             , show ctx
+                                             , show t₁
+                                             , show ctx
+                                             , show t₁
+                                             , ")" ]
+                            in putStrLn out
 printtm ctx (TmVar n) = if ctxlength ctx == n
-                        then putStrLn (index2name n)
+                        then putStrLn (indexToName n)
                         else putStrLn "[bad index]"
 
+pickfreshname ∷ Context → String → (Context, String )
 pickfreshname = undefined
 
-index2name = undefined
+indexToName ∷ Int → String
+indexToName = undefined
 
+ctxlength ∷ Context → Int
 ctxlength ctx = undefined
