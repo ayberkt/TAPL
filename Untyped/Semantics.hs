@@ -20,7 +20,7 @@ printtm ∷ Context → Term → IO ()
 printtm ctx (TmVar n) = if length ctx == n
                         then putStrLn (indexToName n)
                         else putStrLn "[bad index]"
-printtm ctx (TmAbs x t) = let (ctx', x') = pickfreshname ctx x
+printtm ctx (TmAbs x t) = let (ctx', x') = pickFreshName ctx x
                               out        = concat [ "(lambda "
                                                   , show x
                                                   , ". "
@@ -36,11 +36,22 @@ printtm ctx (TmApp t₁ t₂) = let out = concat [ "("
                                              , ")" ]
                             in putStrLn out
 
-pickfreshname ∷ Context → String → (Context, String )
-pickfreshname ctx x = undefined
+pickFreshName ∷ Context → String → (Context, String )
+pickFreshName ctx x = if isNameBound ctx x
+                      then pickFreshName ctx (x ++ "'")
+                      else (((x, NameBind) : ctx), x)
 
+isNameBound ∷ Context → String → Bool
+isNameBound []          x = False
+isNameBound ((y, _):ys) x = if y == x
+                            then True
+                            else isNameBound ys x
+
+-- TODO: Implement
 indexToName ∷ Int → String
 indexToName = undefined
 
+-- `ctxlength` is merely an alas for `length` that we create
+-- for the sake of consistency with TAPL.
 ctxlength ∷ Context → Int
 ctxlength = length
