@@ -18,7 +18,9 @@ data Term = TmVar Int         -- The representation of a variable is
 
 printtm ∷ Context → Term → IO ()
 printtm ctx (TmVar n)   = if length ctx == n
-                          then putStrLn (indexToName n)
+                          then case (indexToName ctx n) of
+                                 Just s  → putStrLn s
+                                 Nothing → putStrLn "[bad index]"
                           else putStrLn "[bad index]"
 printtm ctx (TmAbs x t) = let (ctx', x') = pickFreshName ctx x
                               out        = concat [ "(lambda "
@@ -47,9 +49,11 @@ isNameBound ((y, _):ys) x = if y == x
                             then True
                             else isNameBound ys x
 
--- TODO: Implement
 indexToName ∷ Context → Int → Maybe String
-indexToName ctx x = if x > (ctxlength ctx) - 1
+indexToName ctx x = -- TODO: There is probably a function that looks up
+                    -- from a list and returns Nothing if index is out
+                    -- of bounds.
+                    if x > (ctxlength ctx) - 1
                     then Nothing
                     else let (xn,_) = ctx !! x
                          in Just xn
