@@ -17,9 +17,9 @@ data Term = TmVar Int         -- The representation of a variable is
           deriving (Eq, Ord, Show)
 
 printtm ∷ Context → Term → IO ()
-printtm ctx (TmVar n) = if length ctx == n
-                        then putStrLn (indexToName n)
-                        else putStrLn "[bad index]"
+printtm ctx (TmVar n)   = if length ctx == n
+                          then putStrLn (indexToName n)
+                          else putStrLn "[bad index]"
 printtm ctx (TmAbs x t) = let (ctx', x') = pickFreshName ctx x
                               out        = concat [ "(lambda "
                                                   , show x
@@ -27,7 +27,7 @@ printtm ctx (TmAbs x t) = let (ctx', x') = pickFreshName ctx x
                                                   , show ctx'
                                                   , show t
                                                   , show ")"]
-                        in putStrLn out
+                          in putStrLn out
 printtm ctx (TmApp t₁ t₂) = let out = concat [ "("
                                              , show ctx
                                              , show t₁
@@ -48,8 +48,11 @@ isNameBound ((y, _):ys) x = if y == x
                             else isNameBound ys x
 
 -- TODO: Implement
-indexToName ∷ Int → String
-indexToName = undefined
+indexToName ∷ Context → Int → Maybe String
+indexToName ctx x = if x > (ctxlength ctx) - 1
+                    then Nothing
+                    else let (xn,_) = ctx !! x
+                         in Just xn
 
 -- `ctxlength` is merely an alas for `length` that we create
 -- for the sake of consistency with TAPL.
