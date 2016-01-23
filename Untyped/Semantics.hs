@@ -7,58 +7,54 @@ data Binding = NameBind deriving (Eq, Ord, Show)
 
 type Context = [(String, Binding)]
 
-data Term = TmVar Int         -- The representation of a variable is
-                              -- just a number.
-          | TmAbs String Term -- The representation of an abstraction
-                              -- carries just a subterm for the
-                              -- abstraction's body.
-          | TmApp Term Term   -- An application carries the two subterms
-                              -- being applied.
+data Term = TmVar Int          -- The representation of a variable is
+                               -- just a number.
+          | TmAbs String Term  -- The representation of an abstraction
+                               -- carries just a subterm for the
+                               -- abstraction's body.
+          | TmApp Term Term    -- An application carries the two subterms
+                               -- being applied.
           deriving (Eq, Ord, Show)
 
-printtm ∷ Context → Term → IO ()
-printtm ctx (TmVar n)   = if length ctx == n
-                          then case (indexToName ctx n) of
-                                 Just s  → putStrLn s
-                                 Nothing → putStrLn "[bad index]"
-                          else putStrLn "[bad index]"
-printtm ctx (TmAbs x t) = let (ctx', x') = pickFreshName ctx x
-                              out        = concat [ "(lambda "
-                                                  , show x
-                                                  , ". "
-                                                  , show ctx'
-                                                  , show t
-                                                  , show ")"]
-                          in putStrLn out
-printtm ctx (TmApp t₁ t₂) = let out = concat [ "("
-                                             , show ctx
-                                             , show t₁
-                                             , show ctx
-                                             , show t₁
-                                             , ")" ]
-                            in putStrLn out
+termShift ∷ Int → Term → Term
+termShift d t =
+  let walk c term
+        = case term of
+            TmVar x → if x >= c
+                      then TmVar $ x + d
+                      else TmVar x
+            TmAbs x t₁ → TmAbs x $ walk (succ c) t₁
+            TmApp t₁ t₂ → TmApp (walk c t₁) (walk c t₂)
+  in walk 0 t
 
-pickFreshName ∷ Context → String → (Context, String )
-pickFreshName ctx x = if isNameBound ctx x
-                      then pickFreshName ctx (x ++ "'")
-                      else (((x, NameBind) : ctx), x)
+termSubst ∷ Int → Term → Term → Term
+termSubst j s t =
+  let walk c term
+        = case term of
+            TmVar x → if x == j + c
+                      then termShift c s
+                      else TmVar x
+            TmAbs x t₁ → TmAbs x (walk (c + 1) t₁)
+            TmApp t₁ t₂ → TmApp (walk c t₁) (walk c t₂)
+  in walk 0 t
 
-isNameBound ∷ Context → String → Bool
-isNameBound []          x = False
-isNameBound ((y, _):ys) x = if y == x
-                            then True
-                            else isNameBound ys x
+termSubstTop ∷ Term → Term → Term
+termSubstTop s t = termShift (-1) (termSubst 0 (termShift 1 s) t)
 
-indexToName ∷ Context → Int → Maybe String
-indexToName ctx x = -- TODO: There is probably a function that looks up
-                    -- from a list and returns Nothing if index is out
-                    -- of bounds.
-                    if x > (ctxlength ctx) - 1
-                    then Nothing
-                    else let (xn,_) = ctx !! x
-                         in Just xn
+isVal ∷ Context → Term → Bool
+isVal ctx (TmAbs _ _) = True
+isVal ctx _           = False
 
--- `ctxlength` is merely an alas for `length` that we create
--- for the sake of consistency with TAPL.
-ctxlength ∷ Context → Int
-ctxlength = length
+eval₁ ∷ Context → Term → Term
+eval₁ ctx (TmApp t₁ t₂)
+  | isVal ctx t₂ = let (TmAbs _ t₁₂) = t₁
+                   in termSubstTop t₂ t₁₂
+  | isVal ctx t₁ = let t₂' = eval₁ ctx t₂
+                   in TmApp t₁ t₂'
+  | otherwise = let t₁' = eval₁ ctx t₁
+                in TmApp t₁' t₂
+eval₁ _ t = t
+
+eval ∷ Context → Term → Term
+eval ctx t = let t' = eval₁ ctx t
+             in eval ctx t'
