@@ -16,6 +16,11 @@ data Term = TmVar Int          -- The representation of a variable is
                                -- being applied.
           deriving (Eq, Ord, Show)
 
+data NmTerm = NmVar  String
+            | NmAbs  String NmTerm
+            | NmApp  NmTerm NmTerm
+            deriving (Eq, Show)
+
 termShift ∷ Int → Term → Term
 termShift d t =
   let walk c term

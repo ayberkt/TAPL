@@ -12,8 +12,9 @@ main = do
   hFlush stdout
   whileM_ (fmap not $ hIsEOF stdin) $ do
     hFlush stdout
+    input ← getLine
     case parseString input of
-      Left e  → putStrLn . show $ e
-      Right t → putStrLn . show . eval $ t
+      Left  e  → putStrLn . show $ e
+      Right t → putStrLn . show $ t
     hFlush stdout
   putStrLn "Bye."

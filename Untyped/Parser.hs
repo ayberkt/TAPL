@@ -2,9 +2,10 @@
 
 module Parser where
 
-import           Semantics                     (Term (..))
+import           Semantics                     (NmTerm (..))
 import           Text.ParserCombinators.Parsec (Parser(..)
                                                , ParseError
+                                               , oneOf
                                                , char
                                                , parse
                                                , string
@@ -12,28 +13,37 @@ import           Text.ParserCombinators.Parsec (Parser(..)
                                                , (<|>)
                                                , space)
 
-term ∷ Parser Term
-term =  variable
-    <|> abstraction
+term ∷ Parser NmTerm
+term =  abstraction
     <|> application
 
-variable ∷ Parser Term
-variable = string "x" <|> string "y" <|> string "z"
+parseVariable ∷ Parser String
+parseVariable = do
+  skipMany space
+  x ← oneOf ['a'..'z']
+  return $ pure  x
 
-application ∷ Parser Term
+variable ∷ Parser NmTerm
+variable = do
+  x ← parseVariable
+  return $ NmVar x
+
+application ∷ Parser NmTerm
 application = do
   t₁ ← term
-  string " "
+  skipMany space
   t₂ ← term
-  return $ TmApp t₁ t₂
+  return $ NmApp t₁ t₂
 
-abstraction ∷ Parser Term
+abstraction ∷ Parser NmTerm
 abstraction = do
   string "lambda"
-  x ← variable
+  skipMany space
+  x ← parseVariable
   string "."
+  skipMany space
   t ← term
-  return $ TmAbs x t
+  return $ NmAbs x t
 
-parseString ∷ [Char] → Either ParseError Term
+parseString ∷ [Char] → Either ParseError NmTerm
 parseString input = parse term "" input
