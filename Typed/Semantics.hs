@@ -4,8 +4,6 @@ module Semantics where
 
 import Control.Arrow ((***))
 
-type TypeMismatch = Nothing
-
 data Ty = TyArr Ty Ty
         | TyBool
         deriving (Eq, Show)
@@ -28,10 +26,11 @@ type Context = [(String, Binding)]
 addBinding ∷ Context → String → Binding → Context
 addBinding ctx x bind = (x, bind) : ctx
 
-getTypeFromContext ∷ Context → Int → Maybe Ty
+getTypeFromContext ∷ Context → Int → Either String Ty
 getTypeFromContext ctx i = case getBinding ctx i of
-                             VarBind tyT → Just tyT
-                             _           → TypeMismatch
+                             VarBind tyT → Right tyT
+                             _           → Left msg
+  where msg = "Wrong kind of binding for variable"
 
 getBinding ∷ Context → Int → Binding
 getBinding ctx i = snd $ ctx !! i
@@ -42,23 +41,25 @@ typeOf ∷ Context → Term → Either String Ty
 typeOf γ (TmVar i _) = getTypeFromContext γ i
 typeOf γ (TmAbs x τ₁ t) = let γ' = addBinding γ x (VarBind τ₁)
                               τ' = typeOf γ' t
-                         in case τ' of Just τ₂ → Right $ TyArr τ₁ τ₂
+                         in case τ' of Right τ₂ → Right $ TyArr τ₁ τ₂
 typeOf γ (TmApp t₁ t₂) = let ττ@(τ₁', τ₂') = (typeOf γ) *** (typeOf γ) $ (t₁, t₂)
                          in case ττ of
-                              (Just τ₁, Just τ₂)
+                              (Right τ₁, Right τ₂)
                                 → case τ₁ of
                                     (TyArr β₁ β₂)
                                       → if τ₂ == β₂
-                                        then Just β₂
-                                        else Right "Parameter type mismatch"
+                                        then Right β₂
+                                        else Left "Parameter type mismatch"
                               _ → Left "Parameter type mismatch."
-typeOf _ TmTrue = Just TyBool
-typeOf _ TmFalse = Just TyBool
+typeOf _ TmTrue = Right TyBool
+typeOf _ TmFalse = Right TyBool
 typeOf γ (TmIf t₁ t₂ t₃)
-  | typeOf γ t₁ == TyBool = let τ₂ = typeOf γ t₂
-                            in if τ₂ == typeOf γ t₃
-                               then Right τ₂
-                               else Left armsDifferentMsg
+  | typeOf γ t₁ == Right TyBool = let τ₂' = typeOf γ t₂
+                                  in case τ₂' of
+                                       Right τ₂ → if τ₂' == (typeOf γ t₃)
+                                                  then Right τ₂
+                                                  else Left armsDifferentMsg
+                                       err → err
   | otherwise = Left guardNotABoolMsg
   where armsDifferentMsg = "Arms of conditional have different types."
         guardNotABoolMsg = "Guard of conditional not a boolean."
