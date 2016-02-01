@@ -17,6 +17,14 @@ data Term = TmVar Int Int
           | TmIf Term Term Term
           deriving (Eq, Show)
 
+data NmTerm = NmVar String
+            | NmAbs String Ty NmTerm
+            | NmApp NmTerm NmTerm
+            | NmTrue
+            | NmFalse
+            | NmIf NmTerm NmTerm NmTerm
+            deriving (Eq, Show)
+
 data Binding = NameBind
              | VarBind Ty
              deriving (Eq, Show)
