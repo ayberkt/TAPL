@@ -15,7 +15,8 @@ import Text.ParserCombinators.Parsec (Parser(..)
                                      , many1
                                      , choice
                                      , chainl1
-                                     , eof)
+                                     , eof
+                                     , parse)
 
 import qualified Text.Parsec.Token as T
 import qualified Text.Parsec.Language as L
@@ -55,11 +56,17 @@ allOf p = do
   return r
 
 -------------
--- PARNG --
+-- PARSING --
 -------------
 
 variable ∷ Parser NmTerm
-variable = NmVar <$> T.identifier
+variable = NmVar <$> identifier
+
+
+lambda ∷ Parser NmTerm
+lambda = NmAbs <$> (reservedOp "lambda" *> identifier)
+               <*> (reservedOp ":" *> anyType)
+               <*> (reservedOp "." *> expr)
 
 anyType ∷ Parser Ty
 anyType = let atomicType = parens anyType <|> boolType
@@ -72,6 +79,12 @@ bool = let tru = NmTrue <$ reserved "true"
            fls = NmFalse <$ reserved "false"
        in tru <|> fls
 
+tru ∷ Parser NmTerm
+tru = NmTrue <$ reserved "true"
+
+fls ∷ Parser NmTerm
+fls = NmFalse <$ reserved "false"
+
 atomicExpr ∷ Parser NmTerm
 atomicExpr = parens expr
           <|> variable
@@ -81,7 +94,7 @@ atomicExpr = parens expr
 expr ∷ Parser NmTerm
 expr = foldl1 NmApp <$> many1 atomicExpr
 
-lambda ∷ Parser NmTerm
-lambda = NmAbs <$> (reservedOp "lambda" *> identifier)
-               <*> (reservedOp ":" *> anyType)
-               <*> (reservedOp "." *> expr)
+parseExpr ∷ String → NmTerm
+parseExpr t = case parse (allOf expr) "" t of
+                Left err  → error $ show err
+                Right ast → ast
