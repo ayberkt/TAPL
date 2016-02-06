@@ -15,7 +15,6 @@ main = do
     hFlush stdout
     input ← getLine
     let result     = parseExpr input
-        resultType = typeOf result
     putStrLn . show $ result
     putStr "λ "
     hFlush stdout
