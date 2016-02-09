@@ -2,28 +2,17 @@
 
 module Parser where
 
-import Semantics ( NmTerm(..)
-                 , Ty(..))
+import           Semantics                     (NmTerm (..), Ty (..))
 
-import Text.ParserCombinators.Parsec (Parser(..)
-                                     , ParseError
-                                     , try
-                                     , oneOf
-                                     , char
-                                     , digit
-                                     , satisfy
-                                     , many1
-                                     , choice
-                                     , chainl1
-                                     , alphaNum
-                                     , eof
-                                     , letter
-                                     , parse)
+import           Text.ParserCombinators.Parsec (ParseError, Parser (..),
+                                                alphaNum, chainl1, char, choice,
+                                                digit, eof, letter, many1,
+                                                oneOf, parse, satisfy, try)
 
-import qualified Text.Parsec.Token as T
-import qualified Text.Parsec.Language as L
-import qualified Text.Parsec.Expr as E
-import Control.Applicative ((<|>))
+import           Control.Applicative           ((<|>))
+import qualified Text.Parsec.Expr              as E
+import qualified Text.Parsec.Language          as L
+import qualified Text.Parsec.Token             as T
 
 ------------
 -- LEXING --
@@ -76,12 +65,12 @@ boolTy = reserved "Bool" >> return TyBool
 
 arrTy ∷ Parser Ty
 arrTy = do
-  τ₁ ← anyType
+  τ1 ← anyType
   whiteSpace
   reservedOp "->"
   whiteSpace
-  τ₂ ← anyType
-  return $ TyArr τ₁ τ₂
+  τ2 ← anyType
+  return $ TyArr τ1 τ2
 
 anyType ∷ Parser Ty
 anyType =  boolTy

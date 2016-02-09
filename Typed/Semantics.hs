@@ -1,13 +1,12 @@
 {-# LANGUAGE UnicodeSyntax #-}
 
-module Semantics where
+module Semantics (Ty(..), Term(..), NmTerm(..)) where
 
 import Control.Arrow ((***))
 
 data Ty = TyArr Ty Ty
         | TyBool
         deriving (Eq, Show)
-
 
 data Term = TmVar Int Int
           | TmAbs String Ty Term
