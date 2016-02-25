@@ -1,8 +1,8 @@
 {-# LANGUAGE UnicodeSyntax #-}
 
-module Parser where
+module Untyped.Parser where
 
-import           Semantics                     (NmTerm (..))
+import           Untyped.Semantics             (NmTerm (..))
 import           Text.ParserCombinators.Parsec (Parser(..)
                                                , ParseError
                                                , oneOf

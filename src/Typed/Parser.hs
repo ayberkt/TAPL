@@ -1,18 +1,17 @@
 {-# LANGUAGE UnicodeSyntax #-}
 
-module Parser where
+module Typed.Parser where
 
-import           Semantics                     (NmTerm (..), Ty (..))
-
-import           Text.ParserCombinators.Parsec (ParseError, Parser (..),
-                                                alphaNum, chainl1, char, choice,
-                                                digit, eof, letter, many1,
-                                                oneOf, parse, satisfy, try)
+import           Typed.Semantics               (NmTerm (..), Ty (..))
 
 import           Control.Applicative           ((<|>))
 import qualified Text.Parsec.Expr              as E
 import qualified Text.Parsec.Language          as L
 import qualified Text.Parsec.Token             as T
+import           Text.ParserCombinators.Parsec (ParseError, Parser (..),
+                                                alphaNum, chainl1, char, choice,
+                                                digit, eof, letter, many1,
+                                                oneOf, parse, satisfy, try)
 
 ------------
 -- LEXING --
@@ -64,17 +63,12 @@ boolTy ∷ Parser Ty
 boolTy = reserved "Bool" >> return TyBool
 
 arrTy ∷ Parser Ty
-arrTy = do
-  τ1 ← anyType
-  whiteSpace
-  reservedOp "->"
-  whiteSpace
-  τ2 ← anyType
-  return $ TyArr τ1 τ2
+arrTy = let arrTy' = do { reservedOp "->"; return TyArr }
+        in boolTy `chainl1` arrTy'
 
 anyType ∷ Parser Ty
-anyType =  boolTy
-       <|> arrTy
+anyType = arrTy
+       <|> boolTy
 
 abstraction ∷ Parser NmTerm
 abstraction = do
@@ -89,15 +83,13 @@ abstraction = do
   return $ NmAbs x τ body
 
 application ∷ Parser NmTerm
-application = do
-  f ← expr
-  whiteSpace
-  x ← expr
-  return $ NmApp f x
+application = let app' = do { whiteSpace; return NmApp }
+              in expr `chainl1` app'
 
 expr ∷ Parser NmTerm
-expr =  abstraction
-    -- <|> application
+expr =  parens expr
+    <|> abstraction
+    <|> application
     <|> variable
     <|> bool
 

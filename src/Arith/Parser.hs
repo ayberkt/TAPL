@@ -1,10 +1,10 @@
 {-# LANGUAGE UnicodeSyntax #-}
 
-module Parser where
+module Arith.Parser where
 
 import           Prelude                             hiding ( pred
                                                             , succ)
-import           Semantics                           (Term (..))
+import           Arith.Semantics                           (Term (..))
 import           Text.ParserCombinators.Parsec       ( Parser(..)
                                                      , ParseError
                                                      , char

@@ -1,7 +1,7 @@
 {-# LANGUAGE UnicodeSyntax #-}
 {-# LANGUAGE StandaloneDeriving #-}
 
-module Semantics where
+module Untyped.Semantics where
 
 data Binding = NameBind deriving (Eq, Ord, Show)
 

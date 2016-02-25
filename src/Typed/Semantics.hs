@@ -1,6 +1,6 @@
 {-# LANGUAGE UnicodeSyntax #-}
 
-module Semantics (Ty(..), Term(..), NmTerm(..)) where
+module Typed.Semantics where
 
 import Control.Arrow ((***))
 
@@ -34,9 +34,10 @@ addBinding ∷ Context → String → Binding → Context
 addBinding ctx x bind = (x, bind) : ctx
 
 getTypeFromContext ∷ Context → Int → Either String Ty
-getTypeFromContext ctx i = case getBinding ctx i of
-                             VarBind tyT → Right tyT
-                             _           → Left msg
+getTypeFromContext ctx i
+  = case getBinding ctx i of
+      VarBind tyT → Right tyT
+      _           → Left msg
   where msg = "Wrong kind of binding for variable"
 
 getBinding ∷ Context → Int → Binding
@@ -61,12 +62,13 @@ typeOf γ (TmApp t₁ t₂) = let ττ@(τ₁', τ₂') = (typeOf γ) *** (typeO
 typeOf _ TmTrue = Right TyBool
 typeOf _ TmFalse = Right TyBool
 typeOf γ (TmIf t₁ t₂ t₃)
-  | typeOf γ t₁ == Right TyBool = let τ₂' = typeOf γ t₂
-                                  in case τ₂' of
-                                       Right τ₂ → if τ₂' == (typeOf γ t₃)
-                                                  then Right τ₂
-                                                  else Left armsDifferentMsg
-                                       err → err
+  | typeOf γ t₁ == Right TyBool
+      = let τ₂' = typeOf γ t₂
+        in case τ₂' of
+        Right τ₂ → if τ₂' == (typeOf γ t₃)
+                   then Right τ₂
+                   else Left armsDifferentMsg
+        err → err
   | otherwise = Left guardNotABoolMsg
   where armsDifferentMsg = "Arms of conditional have different types."
         guardNotABoolMsg = "Guard of conditional not a boolean."

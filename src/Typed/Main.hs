@@ -2,10 +2,11 @@
 
 module Main where
 
-import Control.Monad.Loops (whileM_)
-import System.IO (putStr, hFlush, getLine, stdout, hIsEOF, stdin)
-import Semantics
-import Parser (parseExpr)
+import           Control.Monad.Loops (whileM_)
+import           System.IO           (getLine, hFlush, hIsEOF, putStr, stdin,
+                                      stdout)
+import           Typed.Parser        (parseExpr)
+import           Typed.Semantics
 
 main ∷ IO ()
 main = do
