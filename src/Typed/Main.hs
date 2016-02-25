@@ -3,10 +3,8 @@
 module Main where
 
 import           Control.Monad.Loops (whileM_)
-import           System.IO           (getLine, hFlush, hIsEOF, putStr, stdin,
-                                      stdout)
+import           System.IO           (hFlush, hIsEOF, stdin, stdout)
 import           Typed.Parser        (parseExpr)
-import           Typed.Semantics
 
 main ∷ IO ()
 main = do

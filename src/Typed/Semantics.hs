@@ -50,17 +50,21 @@ typeOf γ (TmVar i _) = getTypeFromContext γ i
 typeOf γ (TmAbs x τ1 t)
   = let γ' = addBinding γ x (VarBind τ1)
         τ' = typeOf γ' t
-    in case τ' of Right τ2 → Right $ TyArr τ1 τ2
+    in case τ' of
+         Right τ2 → Right $ TyArr τ1 τ2
+         -- TODO: Fix error message.
+         _        → Left "Something went wrong."
 typeOf γ (TmApp t1 t2)
   = let (τ1', τ2') = (typeOf γ) *** (typeOf γ) $ (t1, t2)
     in case (τ1', τ2') of
          (Right τ1, Right τ2)
            → case τ1 of
-           (TyArr β1 β2)
+           (TyArr _ β2)
              → if τ2 == β2
                then Right β2
                else Left "Parameter type mismatch"
            _ → Left "Parameter type mismatch."
+         _ → error "Case not defined."
 typeOf _ TmTrue = Right TyBool
 typeOf _ TmFalse = Right TyBool
 typeOf γ (TmIf t1 t2 t3)
