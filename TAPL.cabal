@@ -17,6 +17,7 @@ executable arith
   other-modules:       Arith.Parser
                      , Arith.Semantics
   main-is:             Arith/Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
                      , hspec >= 2.1.10
@@ -28,6 +29,7 @@ executable untyped
   other-modules:    Untyped.Parser
                   , Untyped.Semantics
   main-is:          Untyped/Main.hs
+  ghc-options:      -threaded -rtsopts -with-rtsopts=-N
   default-language: Haskell2010
   build-depends:    base >= 4.7 && < 5
                   , hspec >= 2.1.10
@@ -39,6 +41,7 @@ executable typed
   other-modules:    Typed.Parser
                   , Typed.Semantics
   main-is:          Typed/Main.hs
+  ghc-options:      -threaded -rtsopts -with-rtsopts=-N -Wall
   default-language: Haskell2010
   build-depends:    base >= 4.7 && < 5
                   , hspec >= 2.1.10
@@ -52,6 +55,7 @@ test-suite spec
                   , src
   other-modules:    Typed.Parser
                   , Typed.Semantics
+  ghc-options:      -threaded -rtsopts -with-rtsopts=-N -Wall -O2
   default-language: Haskell2010
   build-depends:    base >= 4.7 && < 5
                   , hspec >= 2.1.10

@@ -2,16 +2,15 @@
 
 module Typed.Parser where
 
-import           Typed.Semantics               (NmTerm (..), Ty (..))
-
+import           Typed.Semantics               ()
+import           Typed.Semantics               (NmTerm(..), Ty (..))
 import           Control.Applicative           ((<|>))
-import qualified Text.Parsec.Expr              as E
 import qualified Text.Parsec.Language          as L
 import qualified Text.Parsec.Token             as T
-import           Text.ParserCombinators.Parsec (ParseError, Parser (..),
-                                                alphaNum, chainl1, char, choice,
-                                                digit, eof, letter, many1,
-                                                oneOf, parse, satisfy, try)
+import           Text.ParserCombinators.Parsec (Parser (..),
+                                                alphaNum, chainl1,
+                                                letter,
+                                                oneOf, parse)
 
 ------------
 -- LEXING --
@@ -89,7 +88,7 @@ application = let app' = do { whiteSpace; return NmApp }
 expr ∷ Parser NmTerm
 expr =  parens expr
     <|> abstraction
-    <|> application
+    -- <|> application
     <|> variable
     <|> bool
 

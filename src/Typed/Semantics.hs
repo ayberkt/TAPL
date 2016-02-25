@@ -2,7 +2,7 @@
 
 module Typed.Semantics where
 
-import Control.Arrow ((***))
+import           Control.Arrow ((***))
 
 data Ty = TyArr Ty Ty
         | TyBool
@@ -47,26 +47,28 @@ getBinding ctx i = snd $ ctx !! i
 -- variable name so we use γ instead :(
 typeOf ∷ Context → Term → Either String Ty
 typeOf γ (TmVar i _) = getTypeFromContext γ i
-typeOf γ (TmAbs x τ₁ t) = let γ' = addBinding γ x (VarBind τ₁)
-                              τ' = typeOf γ' t
-                         in case τ' of Right τ₂ → Right $ TyArr τ₁ τ₂
-typeOf γ (TmApp t₁ t₂) = let ττ@(τ₁', τ₂') = (typeOf γ) *** (typeOf γ) $ (t₁, t₂)
-                         in case ττ of
-                              (Right τ₁, Right τ₂)
-                                → case τ₁ of
-                                    (TyArr β₁ β₂)
-                                      → if τ₂ == β₂
-                                        then Right β₂
-                                        else Left "Parameter type mismatch"
-                              _ → Left "Parameter type mismatch."
+typeOf γ (TmAbs x τ1 t)
+  = let γ' = addBinding γ x (VarBind τ1)
+        τ' = typeOf γ' t
+    in case τ' of Right τ2 → Right $ TyArr τ1 τ2
+typeOf γ (TmApp t1 t2)
+  = let (τ1', τ2') = (typeOf γ) *** (typeOf γ) $ (t1, t2)
+    in case (τ1', τ2') of
+         (Right τ1, Right τ2)
+           → case τ1 of
+           (TyArr β1 β2)
+             → if τ2 == β2
+               then Right β2
+               else Left "Parameter type mismatch"
+           _ → Left "Parameter type mismatch."
 typeOf _ TmTrue = Right TyBool
 typeOf _ TmFalse = Right TyBool
-typeOf γ (TmIf t₁ t₂ t₃)
-  | typeOf γ t₁ == Right TyBool
-      = let τ₂' = typeOf γ t₂
-        in case τ₂' of
-        Right τ₂ → if τ₂' == (typeOf γ t₃)
-                   then Right τ₂
+typeOf γ (TmIf t1 t2 t3)
+  | typeOf γ t1 == Right TyBool
+      = let τ2' = typeOf γ t2
+        in case τ2' of
+        Right τ2 → if τ2' == (typeOf γ t3)
+                   then Right τ2
                    else Left armsDifferentMsg
         err → err
   | otherwise = Left guardNotABoolMsg
