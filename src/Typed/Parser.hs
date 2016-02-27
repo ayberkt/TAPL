@@ -60,11 +60,11 @@ boolTy ∷ Parser Ty
 boolTy = reserved "Bool" >> return TyBool
 
 arrTy ∷ Parser Ty
-arrTy = let arrTy' = try $ do { reservedOp "->"; return TyArr }
-        in try $ boolTy `chainl1` arrTy'
+arrTy = let arrTy' = do { reservedOp "->"; return TyArr }
+        in boolTy `chainl1` arrTy'
 
 anyType ∷ Parser Ty
-anyType = try arrTy <|> boolTy
+anyType = arrTy <|> boolTy
 
 abstraction ∷ Parser NmTerm
 abstraction = do
