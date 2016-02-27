@@ -67,7 +67,7 @@ anyType ∷ Parser Ty
 anyType = try arrTy <|> boolTy
 
 abstraction ∷ Parser NmTerm
-abstraction = try $ do
+abstraction = do
   reservedOp "lambda"
   whiteSpace
   x ← identifier
