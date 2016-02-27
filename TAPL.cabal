@@ -47,6 +47,7 @@ executable typed
                   , hspec >= 2.1.10
                   , monad-loops >= 0.4.2
                   , parsec
+                  , containers
 
 test-suite spec
   main-is:          Spec.hs

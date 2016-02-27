@@ -2,7 +2,7 @@ module Main where
 
 import           Test.Hspec
 import qualified Typed.Parser    as P
-import           Typed.Semantics (NmTerm(..), Ty(..))
+import           Typed.Semantics (NmTerm(..), Ty(..), removeNames, Term(..))
 
 
 main :: IO ()
@@ -60,3 +60,17 @@ main = hspec $ do
     it ("correctly parses " ++ input7) $
       P.parseExpr input7
       `shouldBe` (NmApp (NmAbs "x" TyBool (NmVar "x"))) (NmVar "x")
+  describe "Typed.Semantics --- removeNames:" $ do
+    let input1 = NmAbs "x" TyBool (NmVar "x")
+    it ("can handle " ++ show input1) $ do
+      removeNames input1 `shouldBe` TmAbs "x" TyBool (TmVar 0)
+    let input2 = NmAbs "y" TyBool
+                 $ NmAbs "x" TyBool (NmApp (NmVar "x") (NmVar "y"))
+    it ("can handle " ++ show input2) $ do
+      removeNames input2
+      `shouldBe` TmAbs "y" TyBool (TmAbs "x" TyBool (TmApp (TmVar 0) (TmVar 1)))
+    let input3 = NmAbs "y" TyBool
+                 $ NmAbs "x" TyBool (NmApp (NmVar "y") (NmVar "x"))
+    it ("can handle " ++ show input3) $ do
+      removeNames input3
+      `shouldBe` TmAbs "y" TyBool (TmAbs "x" TyBool (TmApp (TmVar 1) (TmVar 0)))

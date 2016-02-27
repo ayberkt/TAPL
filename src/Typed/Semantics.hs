@@ -2,13 +2,15 @@
 
 module Typed.Semantics where
 
-import           Control.Arrow ((***))
+import           Control.Arrow   ((***))
+import           Data.List       (elemIndex)
+
 
 data Ty = TyArr Ty Ty
         | TyBool
         deriving (Eq, Show)
 
-data Term = TmVar Int Int
+data Term = TmVar Int
           | TmAbs String Ty Term
           | TmApp Term Term
           | TmTrue
@@ -30,6 +32,24 @@ data Binding = NameBind
 
 type Context = [(String, Binding)]
 
+removeNames :: NmTerm → Term
+removeNames t
+  = let remove :: NmTerm -> Context -> Term
+        remove (NmVar x) ctx
+          = case elemIndex (x, NameBind) ctx of
+              Just n -> TmVar n
+              Nothing -> error ("Variable " ++ x ++ " is not bound.")
+        remove (NmAbs x t e) ctx
+          = let ctx' = (x, NameBind) : ctx
+            in TmAbs x t $ remove e ctx'
+        remove (NmApp e1 e2) ctx
+          = TmApp (remove e1 ctx) (remove e2 ctx)
+        remove (NmIf e1 e2 e3) ctx
+          = TmIf (remove e1 ctx) (remove e2 ctx) (remove e3 ctx)
+        remove NmTrue  _ = TmTrue
+        remove NmFalse _ = TmFalse
+    in remove t []
+
 addBinding ∷ Context → String → Binding → Context
 addBinding ctx x bind = (x, bind) : ctx
 
@@ -41,12 +61,12 @@ getTypeFromContext ctx i
   where msg = "Wrong kind of binding for variable"
 
 getBinding ∷ Context → Int → Binding
-getBinding ctx i = snd $ ctx !! i
+getBinding ctx i = case (ctx !! i) of (_, b) -> b
 
 -- Unfortunately, GHC doesn't accept CTX as a valid
 -- variable name so we use ctx instead :(
 typeOf ∷ Context → Term → Either String Ty
-typeOf ctx (TmVar i _) = getTypeFromContext ctx i
+typeOf ctx (TmVar i) = getTypeFromContext ctx i
 typeOf ctx (TmAbs x τ1 t)
   = let ctx' = addBinding ctx x (VarBind τ1)
         τ' = typeOf ctx' t
