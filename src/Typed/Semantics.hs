@@ -43,19 +43,19 @@ getTypeFromContext ctx i
 getBinding ∷ Context → Int → Binding
 getBinding ctx i = snd $ ctx !! i
 
--- Unfortunately, GHC doesn't accept Γ as a valid
--- variable name so we use γ instead :(
+-- Unfortunately, GHC doesn't accept CTX as a valid
+-- variable name so we use ctx instead :(
 typeOf ∷ Context → Term → Either String Ty
-typeOf γ (TmVar i _) = getTypeFromContext γ i
-typeOf γ (TmAbs x τ1 t)
-  = let γ' = addBinding γ x (VarBind τ1)
-        τ' = typeOf γ' t
+typeOf ctx (TmVar i _) = getTypeFromContext ctx i
+typeOf ctx (TmAbs x τ1 t)
+  = let ctx' = addBinding ctx x (VarBind τ1)
+        τ' = typeOf ctx' t
     in case τ' of
          Right τ2 → Right $ TyArr τ1 τ2
          -- TODO: Fix error message.
          _        → Left "Something went wrong."
-typeOf γ (TmApp t1 t2)
-  = let (τ1', τ2') = (typeOf γ) *** (typeOf γ) $ (t1, t2)
+typeOf ctx (TmApp t1 t2)
+  = let (τ1', τ2') = (typeOf ctx) *** (typeOf ctx) $ (t1, t2)
     in case (τ1', τ2') of
          (Right τ1, Right τ2)
            → case τ1 of
@@ -67,11 +67,11 @@ typeOf γ (TmApp t1 t2)
          _ → error "Case not defined."
 typeOf _ TmTrue = Right TyBool
 typeOf _ TmFalse = Right TyBool
-typeOf γ (TmIf t1 t2 t3)
-  | typeOf γ t1 == Right TyBool
-      = let τ2' = typeOf γ t2
+typeOf ctx (TmIf t1 t2 t3)
+  | typeOf ctx t1 == Right TyBool
+      = let τ2' = typeOf ctx t2
         in case τ2' of
-        Right τ2 → if τ2' == (typeOf γ t3)
+        Right τ2 → if τ2' == (typeOf ctx t3)
                    then Right τ2
                    else Left armsDifferentMsg
         err → err

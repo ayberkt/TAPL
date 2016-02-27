@@ -5,8 +5,9 @@ module Typed.Parser where
 import           Control.Applicative           ((<|>))
 import qualified Text.Parsec.Language          as L
 import qualified Text.Parsec.Token             as T
-import           Text.ParserCombinators.Parsec (Parser, alphaNum, chainl1,
-                                                letter, oneOf, parse)
+import           Text.ParserCombinators.Parsec (Parser, alphaNum, chainl1, char,
+                                                letter, lookAhead, many1,
+                                                oneOf, parse, try)
 import           Typed.Semantics               (NmTerm (..), Ty (..))
 
 ------------
@@ -59,15 +60,14 @@ boolTy ∷ Parser Ty
 boolTy = reserved "Bool" >> return TyBool
 
 arrTy ∷ Parser Ty
-arrTy = let arrTy' = do { reservedOp "->"; return TyArr }
-        in boolTy `chainl1` arrTy'
+arrTy = let arrTy' = try $ do { reservedOp "->"; return TyArr }
+        in try $ boolTy `chainl1` arrTy'
 
 anyType ∷ Parser Ty
-anyType = arrTy
-       <|> boolTy
+anyType = try arrTy <|> boolTy
 
 abstraction ∷ Parser NmTerm
-abstraction = do
+abstraction = try $ do
   reservedOp "lambda"
   whiteSpace
   x ← identifier
@@ -79,15 +79,16 @@ abstraction = do
   return $ NmAbs x τ body
 
 application ∷ Parser NmTerm
-application = let app' = do { whiteSpace; return NmApp }
-              in expr `chainl1` app'
+application = let f = try $ do { whiteSpace; return NmApp}
+              in try $ nonApp `chainl1` f
+
+nonApp ∷ Parser NmTerm
+nonApp = parens expr
+      <|> abstraction
+      <|> variable
 
 expr ∷ Parser NmTerm
-expr =  parens expr
-    <|> abstraction
-    -- <|> application
-    <|> variable
-    <|> bool
+expr = application <|> nonApp
 
 parseExpr ∷ String → NmTerm
 parseExpr t = case parse expr "" t of
