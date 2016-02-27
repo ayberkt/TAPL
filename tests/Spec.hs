@@ -74,3 +74,7 @@ main = hspec $ do
     it ("can handle " ++ show input3) $ do
       removeNames input3
       `shouldBe` TmAbs "y" TyBool (TmAbs "x" TyBool (TmApp (TmVar 1) (TmVar 0)))
+    let input4 = NmAbs "x" TyBool (NmAbs "x" TyBool (NmVar "x"))
+    it ("can handle " ++ show input3) $ do
+      removeNames input4
+      `shouldBe` TmAbs "x" TyBool (TmAbs "x" TyBool (TmVar 0))
