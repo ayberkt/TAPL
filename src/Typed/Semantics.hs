@@ -32,23 +32,20 @@ data Binding = NameBind
 
 type Context = [(String, Binding)]
 
-removeNames :: NmTerm → Term
-removeNames t
-  = let remove :: NmTerm -> Context -> Term
-        remove (NmVar x) ctx
-          = case elemIndex (x, NameBind) ctx of
-              Just n -> TmVar n
-              Nothing -> error ("Variable " ++ x ++ " is not bound.")
-        remove (NmAbs x t e) ctx
-          = let ctx' = (x, NameBind) : ctx
-            in TmAbs x t $ remove e ctx'
-        remove (NmApp e1 e2) ctx
-          = TmApp (remove e1 ctx) (remove e2 ctx)
-        remove (NmIf e1 e2 e3) ctx
-          = TmIf (remove e1 ctx) (remove e2 ctx) (remove e3 ctx)
-        remove NmTrue  _ = TmTrue
-        remove NmFalse _ = TmFalse
-    in remove t []
+removeNames :: Context → NmTerm → Term
+removeNames ctx (NmVar x)
+  = case elemIndex (x, NameBind) ctx of
+      Just n -> TmVar n
+      Nothing -> error ("Variable " ++ x ++ " is not bound.")
+removeNames ctx (NmAbs x t e)
+  = let ctx' = (x, NameBind) : ctx
+    in TmAbs x t $ removeNames ctx' e
+removeNames ctx (NmApp e1 e2)
+  = TmApp (removeNames ctx e1) (removeNames ctx e2)
+removeNames ctx (NmIf e1 e2 e3)
+  = TmIf (removeNames ctx e1) (removeNames ctx e2) (removeNames ctx e3)
+removeNames _ NmTrue = TmTrue
+removeNames _ NmFalse = TmFalse
 
 addBinding ∷ Context → String → Binding → Context
 addBinding ctx x bind = (x, bind) : ctx
