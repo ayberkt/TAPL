@@ -45,14 +45,6 @@ main = hspec $ do
     it ("correctly parses " ++ input5) $
       P.parseExpr input5
       `shouldBe` NmApp (NmApp (NmVar "f") (NmVar "g")) (NmVar "x")
-    let input5 = "f g h x"
-    it ("correctly parses " ++ input5) $
-      P.parseExpr input5
-      `shouldBe` NmApp
-                  (NmApp
-                   (NmApp (NmVar "f") (NmVar "g"))
-                   (NmVar "h"))
-                  (NmVar "x")
     let input6 = "(lambda x:Bool. x) (lambda x:Bool. x) (lambda x:Bool. x)"
     it ("correctly parses " ++ input6) $
       P.parseExpr input6
@@ -61,6 +53,13 @@ main = hspec $ do
     it ("correctly parses " ++ input7) $
       P.parseExpr input7
       `shouldBe` (NmApp (NmAbs "x" TyBool (NmVar "x"))) (NmVar "x")
+    let input8 = "f g h x"
+    it ("correctly parses " ++ input8) $
+      P.parseExpr input8
+      `shouldBe` NmApp (NmApp
+                        (NmApp (NmVar "f") (NmVar "g"))
+                        (NmVar "h"))
+                       (NmVar "x")
   describe "Typed.Semantics --- removeNames:" $ do
     let input1 = NmAbs "x" TyBool (NmVar "x")
     it ("can handle " ++ show input1) $ do
@@ -97,4 +96,15 @@ main = hspec $ do
       removeNames ctx7 input7
       `shouldBe`
       TmAbs "w" TyBool (TmAbs "a" TyBool (TmVar 6))
+    let input8 = NmAbs "s" TyBool
+                  (NmAbs "z" TyBool
+                   (NmApp (NmVar "s")
+                    (NmApp (NmVar "s") (NmVar "z"))))
+    it ("can handle " ++ show input7) $ do
+      removeNames [] input8
+      `shouldBe`
+      TmAbs "s" TyBool
+        (TmAbs "z" TyBool
+         (TmApp (TmVar 1)
+          (TmApp (TmVar 1) (TmVar 0))))
 
