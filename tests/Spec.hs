@@ -40,3 +40,23 @@ main = hspec $ do
     it ("correctly parses " ++ input4) $
       P.parseExpr input4
       `shouldBe` let f = NmAbs "x" TyBool (NmVar "x") in NmApp f f
+    let input5 = "f g x"
+    it ("correctly parses " ++ input5) $
+      P.parseExpr input5
+      `shouldBe` NmApp (NmApp (NmVar "f") (NmVar "g")) (NmVar "x")
+    let input5 = "f g h x"
+    it ("correctly parses " ++ input5) $
+      P.parseExpr input5
+      `shouldBe` NmApp
+                  (NmApp
+                   (NmApp (NmVar "f") (NmVar "g"))
+                   (NmVar "h"))
+                  (NmVar "x")
+    let input6 = "(lambda x:Bool. x) (lambda x:Bool. x) (lambda x:Bool. x)"
+    it ("correctly parses " ++ input6) $
+      P.parseExpr input6
+      `shouldBe` let f = NmAbs "x" TyBool (NmVar "x") in NmApp (NmApp f f) f
+    let input7 = "(lambda x:Bool. x) x"
+    it ("correctly parses " ++ input7) $
+      P.parseExpr input7
+      `shouldBe` (NmApp (NmAbs "x" TyBool (NmVar "x"))) (NmVar "x")
