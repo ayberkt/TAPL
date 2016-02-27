@@ -79,8 +79,8 @@ abstraction = try $ do
   return $ NmAbs x τ body
 
 application ∷ Parser NmTerm
-application = let f = try $ do { whiteSpace; return NmApp}
-              in try $ nonApp `chainl1` f
+application = let f = do { whiteSpace; return NmApp}
+              in nonApp `chainl1` f
 
 nonApp ∷ Parser NmTerm
 nonApp = parens expr
