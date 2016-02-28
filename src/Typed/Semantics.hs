@@ -2,7 +2,6 @@
 
 module Typed.Semantics where
 
-import           Control.Arrow   ((***))
 import           Data.List       (elemIndex)
 
 
@@ -50,48 +49,36 @@ removeNames _ NmFalse = TmFalse
 addBinding ∷ Context → String → Binding → Context
 addBinding ctx x bind = (x, bind) : ctx
 
-getTypeFromContext ∷ Context → Int → Either String Ty
+getTypeFromContext ∷ Context → Int → Ty
 getTypeFromContext ctx i
   = case getBinding ctx i of
-      VarBind tyT → Right tyT
-      _           → Left msg
-  where msg = "Wrong kind of binding for variable"
+      VarBind tyT →  tyT
+      _           → error "Wrong kind of binding for variable."
 
 getBinding ∷ Context → Int → Binding
 getBinding ctx i = case (ctx !! i) of (_, b) -> b
 
 -- Unfortunately, GHC doesn't accept CTX as a valid
 -- variable name so we use ctx instead :(
-typeOf ∷ Context → Term → Either String Ty
+typeOf ∷ Context → Term → Ty
 typeOf ctx (TmVar i) = getTypeFromContext ctx i
 typeOf ctx (TmAbs x τ1 t)
   = let ctx' = addBinding ctx x (VarBind τ1)
-        τ' = typeOf ctx' t
-    in case τ' of
-         Right τ2 → Right $ TyArr τ1 τ2
-         -- TODO: Fix error message.
-         _        → Left "Something went wrong."
+        τ2 = typeOf ctx' t
+    in TyArr τ1 τ2
 typeOf ctx (TmApp t1 t2)
-  = let (τ1', τ2') = (typeOf ctx) *** (typeOf ctx) $ (t1, t2)
-    in case (τ1', τ2') of
-         (Right τ1, Right τ2)
-           → case τ1 of
-           (TyArr _ β2)
-             → if τ2 == β2
-               then Right β2
-               else Left "Parameter type mismatch"
-           _ → Left "Parameter type mismatch."
-         _ → error "Case not defined."
-typeOf _ TmTrue = Right TyBool
-typeOf _ TmFalse = Right TyBool
+  = let τ1 = typeOf ctx t1
+        τ2 = typeOf ctx t2
+    in case τ1 of
+         TyArr τ1_1 τ1_2
+           → if τ2 == τ1_1 then τ1_2 else error "Parameter type mismatch."
+         _ → error "Arrow type expected."
+typeOf _ TmTrue = TyBool
+typeOf _ TmFalse = TyBool
 typeOf ctx (TmIf t1 t2 t3)
-  | typeOf ctx t1 == Right TyBool
-      = let τ2' = typeOf ctx t2
-        in case τ2' of
-        Right τ2 → if τ2' == (typeOf ctx t3)
-                   then Right τ2
-                   else Left armsDifferentMsg
-        err → err
-  | otherwise = Left guardNotABoolMsg
-  where armsDifferentMsg = "Arms of conditional have different types."
-        guardNotABoolMsg = "Guard of conditional not a boolean."
+  | typeOf ctx t1 == TyBool
+      = let τ2 = typeOf ctx t2
+        in if τ2 == typeOf ctx t3
+           then τ2
+           else error "Arms of conditional have different types."
+  | otherwise = error "Guard of conditional is not a boolean."

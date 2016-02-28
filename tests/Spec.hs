@@ -2,12 +2,13 @@ module Main where
 
 import           Test.Hspec
 import qualified Typed.Parser    as P
-import           Typed.Semantics (Binding(NameBind), NmTerm (..), Term (..),
-                                  Ty (..), removeNames)
+import           Typed.Semantics (Binding(..), NmTerm (..), Term (..),
+                                  Ty (..), removeNames, typeOf)
 
 
 main :: IO ()
 main = hspec $ do
+
   describe "Typed.Parser can parse variables:" $ do
     let input1 = "x"
     it ("correctly parses " ++ input1) $
@@ -15,6 +16,7 @@ main = hspec $ do
     let input2 = "ayberk"
     it ("correctly parses " ++ input2) $
       P.parseExpr input2 `shouldBe` NmVar "ayberk"
+
   describe "Typed.Parser can parse abstractions:" $ do
     let input1 = "lambda x:Bool. x"
     it ("correctly parses " ++ input1) $
@@ -36,6 +38,7 @@ main = hspec $ do
     let input7 = "lambda x : Bool . x"
     it ("correctly parses " ++ input7) $
       P.parseExpr input7 `shouldBe` NmAbs "x" TyBool (NmVar "x")
+
   describe "Typed.Parser can parse applications:" $ do
     let input4 = "(lambda x:Bool. x) (lambda x:Bool. x)"
     it ("correctly parses " ++ input4) $
@@ -60,6 +63,7 @@ main = hspec $ do
                         (NmApp (NmVar "f") (NmVar "g"))
                         (NmVar "h"))
                        (NmVar "x")
+
   describe "Typed.Semantics --- removeNames:" $ do
     let input1 = NmAbs "x" TyBool (NmVar "x")
     it ("can handle " ++ show input1) $ do
@@ -107,4 +111,14 @@ main = hspec $ do
         (TmAbs "z" TyBool
          (TmApp (TmVar 1)
           (TmApp (TmVar 1) (TmVar 0))))
-
+  describe "Typed.Semantics --- typeOf:" $ do
+    let expr1 = TmAbs "x" TyBool (TmVar 0)
+    it ("can handle " ++ show expr1) $ do
+      typeOf [] expr1 `shouldBe` (TyArr TyBool TyBool)
+    let expr2 = TmApp expr1 (TmVar 1)
+        ctx2  = [("x", NameBind), ("x", VarBind TyBool)]
+    it ("can handle " ++ show expr2) $ do
+      typeOf ctx2 expr2 `shouldBe` TyBool
+    let expr3 = TmAbs "y" TyBool (TmAbs "x" TyBool (TmApp expr1 (TmVar 0)))
+    it ("can handle " ++ show expr3) $ do
+      typeOf [] expr3 `shouldBe` TyArr TyBool (TyArr TyBool TyBool)
