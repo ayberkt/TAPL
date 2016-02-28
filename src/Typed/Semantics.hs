@@ -99,7 +99,8 @@ termSubst j s (TmVar n)
   = if n == j then s else (TmVar n)
 termSubst j s (TmAbs x τ t)
   = TmAbs x τ $ termSubst (succ j) (termShift 1 s) t
-termSubst j s (TmApp t1 t2) = TmApp (termSubst j s t1) (termSubst j s t2)
+termSubst j s (TmApp t1 t2)
+  = TmApp (termSubst j s t1) (termSubst j s t2)
 termSubst _ _ t = t
 
 
