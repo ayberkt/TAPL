@@ -84,33 +84,27 @@ typeOf ctx (TmIf t1 t2 t3)
 typeOf _ TmTrue = Right TyBool
 typeOf _ TmFalse = Right TyBool
 
-termShift ∷ Int → Int → Term → Term
-termShift d c (TmVar k)
-  = if k < c then TmVar k else TmVar (k + d)
-termShift d c (TmAbs _ _ t)
-  = termShift d (succ c) t
-termShift d c (TmApp t1 t2)
-  = TmApp (termShift d c t1) (termShift d c t2)
-termShift _ _  TmTrue = TmTrue
-termShift _ _ TmFalse = TmFalse
-termShift d c (TmIf t1 t2 t3)
-  = TmIf (termShift d c t1) (termShift d c t2) (termShift d c t3)
 
+termShift ∷ Int → Term → Term
+termShift d t
+  = let walk ∷ Int → Term → Term
+        walk _ (TmVar n) = TmVar (n + d)
+        walk c (TmAbs x τ t1) = TmAbs x τ $ walk (c + 1) t1
+        walk c (TmApp t1 t2) = TmApp (walk c t1) (walk c t2)
+        walk _ t' = t'
+    in walk 0 t
 
 termSubst ∷ Int → Term → Term → Term
-termSubst j s (TmVar k)
-  = if k == j then s else (TmVar k)
+termSubst j s (TmVar n)
+  = if n == j then s else (TmVar n)
 termSubst j s (TmAbs x τ t)
-  = TmAbs x τ $ termSubst (succ j) (termShift 1 0 s) t
-termSubst j s (TmApp t1 t2)
-  = TmApp (termSubst j s t1) (termSubst j s t2)
-termSubst _ _  TmTrue
-  = TmTrue
-termSubst _ _ TmFalse
-  = TmFalse
-termSubst j s (TmIf t1 t2 t3)
-  = TmIf (termSubst j s t1) (termSubst j s t2) (termSubst j s t3)
+  = TmAbs x τ $ termSubst (succ j) (termShift 1 s) t
+termSubst j s (TmApp t1 t2) = TmApp (termSubst j s t1) (termSubst j s t2)
+termSubst _ _ t = t
 
+
+termSubstTop ∷ Term → Term → Term
+termSubstTop s t = termShift (-1) (termSubst 0 (termShift 1 s) t)
 
 isVal ∷ Term → Bool
 isVal TmTrue = True
@@ -118,9 +112,6 @@ isVal TmFalse = True
 isVal (TmAbs _ _ _) = True
 isVal (TmVar _) = True
 isVal _ = False
-
-termSubstTop ∷ Term → Term → Term
-termSubstTop s t = termShift (-1) 0 (termSubst 0 (termShift 1 0 s) t)
 
 eval ∷ Context → Term → Term
 eval ctx (TmApp t1 t2)
