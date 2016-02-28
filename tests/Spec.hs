@@ -3,7 +3,7 @@ module Main where
 import           Test.Hspec
 import qualified Typed.Parser    as P
 import           Typed.Semantics (Binding(..), NmTerm (..), Term (..),
-                                  Ty (..), removeNames, typeOf)
+                                  Ty (..), removeNames, typeOf, eval)
 
 
 main :: IO ()
@@ -111,7 +111,7 @@ main = hspec $ do
         (TmAbs "z" TyBool
          (TmApp (TmVar 1)
           (TmApp (TmVar 1) (TmVar 0))))
-  describe "Typed.Semantics --- typeOf:" $ do
+  describe "Type checker" $ do
     let expr1 = TmAbs "x" TyBool (TmVar 0)
     it ("accepts " ++ show expr1) $ do
       typeOf [] expr1 `shouldBe` (Right $ TyArr TyBool TyBool)
@@ -130,3 +130,22 @@ main = hspec $ do
     it ("rejects " ++ show expr5) $ do
       typeOf [("k", VarBind TyBool)] expr5
       `shouldBe` (Left $ "Arms of conditional have different types.")
+  describe "Evaluator" $ do
+    let expr1 = TmVar 0
+    it ("correctly evaluates " ++ show expr1) $ do
+      eval [("z", VarBind TyBool)] expr1
+      `shouldBe` (TmVar 0)
+    let expr2 = (TmApp (TmAbs "x" TyBool (TmVar 0))) (TmVar 0)
+    it ("correctly evaluates " ++ show expr1) $ do
+      eval [("z", VarBind TyBool)] expr2
+      `shouldBe` (TmVar 0)
+    let expr3 = let f = (TmAbs "x" (TyArr TyBool TyBool) (TmVar 0))
+                    x = (TmAbs "foo" TyBool (TmVar 0))
+                in TmApp f x
+    it ("correctly evaluates " ++ show expr3) $ do
+      eval [] expr3
+      `shouldBe` (TmAbs "foo" TyBool (TmVar 0))
+    let expr4 = TmAbs "foo" TyBool (TmVar 0)
+    it ("correctly evaluates " ++ show expr4) $ do
+      eval [] expr4
+      `shouldBe` (TmAbs "foo" TyBool (TmVar 0))

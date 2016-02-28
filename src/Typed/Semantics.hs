@@ -116,6 +116,7 @@ isVal ∷ Term → Bool
 isVal TmTrue = True
 isVal TmFalse = True
 isVal (TmAbs _ _ _) = True
+isVal (TmVar _) = True
 isVal _ = False
 
 termSubstTop ∷ Term → Term → Term
@@ -125,7 +126,11 @@ eval ∷ Context → Term → Term
 eval ctx (TmApp t1 t2)
   = case t1 of
       (TmAbs _ _ t1_2)
-        | isVal t2 → termSubstTop t2 t1_2
+        → if isVal t2
+          then termSubstTop t2 t1_2
+          else if isVal t1
+               then let t2' = eval ctx t2 in (TmApp t1 t2')
+               else let t1' = eval ctx t1 in (TmApp t1' t2)
       _ → if isVal t1
           then let t2' = eval ctx t2 in (TmApp t1 t2')
           else let t1' = eval ctx t1 in (TmApp t1' t2)
@@ -134,4 +139,4 @@ eval _ (TmIf TmFalse _ t3) = t3
 eval ctx (TmIf t1 t2 t3)
   = let t1' = eval ctx t1
     in TmIf t1' t2 t3
-eval _ _ = error "No matching rule."
+eval _ t = t
