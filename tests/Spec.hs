@@ -113,12 +113,20 @@ main = hspec $ do
           (TmApp (TmVar 1) (TmVar 0))))
   describe "Typed.Semantics --- typeOf:" $ do
     let expr1 = TmAbs "x" TyBool (TmVar 0)
-    it ("can handle " ++ show expr1) $ do
+    it ("accepts " ++ show expr1) $ do
       typeOf [] expr1 `shouldBe` (Right $ TyArr TyBool TyBool)
     let expr2 = TmApp expr1 (TmVar 1)
         ctx2  = [("x", NameBind), ("x", VarBind TyBool)]
-    it ("can handle " ++ show expr2) $ do
+    it ("accepts " ++ show expr2) $ do
       typeOf ctx2 expr2 `shouldBe` Right TyBool
     let expr3 = TmAbs "y" TyBool (TmAbs "x" TyBool (TmApp expr1 (TmVar 0)))
-    it ("can handle " ++ show expr3) $ do
+    it ("accepts " ++ show expr3) $ do
       typeOf [] expr3 `shouldBe` (Right $ TyArr TyBool (TyArr TyBool TyBool))
+    let expr4 = TmIf (TmVar 0) expr1 expr1
+    it ("rejects " ++ show expr4) $ do
+      typeOf [("x", VarBind (TyArr TyBool TyBool))] expr4
+      `shouldBe` (Left "Guard of conditional is not a boolean.")
+    let expr5 = TmAbs "x" TyBool (TmIf (TmVar 0) expr1 (TmVar 1))
+    it ("rejects " ++ show expr5) $ do
+      typeOf [("k", VarBind TyBool)] expr5
+      `shouldBe` (Left $ "Arms of conditional have different types.")

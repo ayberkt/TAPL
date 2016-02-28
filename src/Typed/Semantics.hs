@@ -58,15 +58,16 @@ getTypeFromContext ctx i
 getBinding ∷ Context → Int → Binding
 getBinding ctx i = case (ctx !! i) of (_, b) -> b
 
--- Unfortunately, GHC doesn't accept CTX as a valid
--- variable name so we use ctx instead :(
 typeOf ∷ Context → Term → Either String Ty
+
 typeOf ctx (TmVar i) = getTypeFromContext ctx i
+
 typeOf ctx (TmAbs x τ1 t)
   = let ctx' = addBinding ctx x (VarBind τ1)
     in case typeOf ctx' t of
          Right τ2 → Right $ TyArr τ1 τ2
          err → err
+
 typeOf ctx (TmApp t1 t2)
   = let Right τ1 = typeOf ctx t1
         Right τ2 = typeOf ctx t2
@@ -75,13 +76,15 @@ typeOf ctx (TmApp t1 t2)
            → if τ2 == τ1_1
              then Right τ1_2
              else Left "Parameter type mismatch."
-         _ → error "Arrow type expected."
-typeOf _ TmTrue = Right TyBool
-typeOf _ TmFalse = Right TyBool
+         _ → Left "Arrow type expected."
+
 typeOf ctx (TmIf t1 t2 t3)
   | typeOf ctx t1 == Right TyBool
       = let τ2 = typeOf ctx t2
         in if τ2 == typeOf ctx t3
            then τ2
-           else error "Arms of conditional have different types."
-  | otherwise = error "Guard of conditional is not a boolean."
+           else Left "Arms of conditional have different types."
+  | otherwise = Left "Guard of conditional is not a boolean."
+
+typeOf _ TmTrue = Right TyBool
+typeOf _ TmFalse = Right TyBool
