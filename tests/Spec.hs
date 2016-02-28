@@ -114,11 +114,11 @@ main = hspec $ do
   describe "Typed.Semantics --- typeOf:" $ do
     let expr1 = TmAbs "x" TyBool (TmVar 0)
     it ("can handle " ++ show expr1) $ do
-      typeOf [] expr1 `shouldBe` (TyArr TyBool TyBool)
+      typeOf [] expr1 `shouldBe` (Right $ TyArr TyBool TyBool)
     let expr2 = TmApp expr1 (TmVar 1)
         ctx2  = [("x", NameBind), ("x", VarBind TyBool)]
     it ("can handle " ++ show expr2) $ do
-      typeOf ctx2 expr2 `shouldBe` TyBool
+      typeOf ctx2 expr2 `shouldBe` Right TyBool
     let expr3 = TmAbs "y" TyBool (TmAbs "x" TyBool (TmApp expr1 (TmVar 0)))
     it ("can handle " ++ show expr3) $ do
-      typeOf [] expr3 `shouldBe` TyArr TyBool (TyArr TyBool TyBool)
+      typeOf [] expr3 `shouldBe` (Right $ TyArr TyBool (TyArr TyBool TyBool))
