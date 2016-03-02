@@ -1,6 +1,6 @@
 {-# LANGUAGE UnicodeSyntax #-}
 
-module Typed.Semantics where
+module FullSimple.Semantics where
 
 import           Data.List (elemIndex)
 

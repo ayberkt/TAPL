@@ -1,6 +1,6 @@
 {-# LANGUAGE UnicodeSyntax #-}
 
-module Typed.Parser where
+module FullSimple.Parser where
 
 import           Control.Applicative           ((<|>))
 import qualified Text.Parsec.Language          as L
