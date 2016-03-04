@@ -85,6 +85,8 @@ nonApp ∷ Parser NmTerm
 nonApp = parens expr
       <|> abstraction
       <|> variable
+      <|> true
+      <|> false
 
 expr ∷ Parser NmTerm
 expr = application <|> nonApp
