@@ -3,11 +3,11 @@
 module FullSimple.Parser where
 
 import           Control.Applicative           ((<|>))
+import           FullSimple.Semantics          (NmTerm (..), Ty (..))
 import qualified Text.Parsec.Language          as L
 import qualified Text.Parsec.Token             as T
 import           Text.ParserCombinators.Parsec (Parser, alphaNum, chainl1,
                                                 letter, oneOf, parse)
-import           FullSimple.Semantics               (NmTerm (..), Ty (..))
 
 ------------
 -- LEXING --
@@ -18,7 +18,7 @@ lexer = T.makeTokenParser
         $ L.emptyDef { T.identStart      = letter
                      , T.identLetter     = alphaNum
                      , T.reservedOpNames = ["lambda", ".", ":", "->"]
-                     , T.reservedNames   = ["true", "false", "unit", "Bool"]
+                     , T.reservedNames   = ["true", "false", "unit", "Bool", "Unit"]
                      , T.opLetter        = oneOf ".:"
                      }
 
@@ -61,12 +61,15 @@ bool = true <|> false
 boolTy ∷ Parser Ty
 boolTy = reserved "Bool" >> return TyBool
 
+unitTy ∷ Parser Ty
+unitTy = reserved "Unit" >> return TyUnit
+
 arrTy ∷ Parser Ty
 arrTy = let arrTy' = do { reservedOp "->"; return TyArr }
         in boolTy `chainl1` arrTy'
 
 anyType ∷ Parser Ty
-anyType = arrTy <|> boolTy
+anyType = arrTy <|> boolTy <|> unitTy
 
 abstraction ∷ Parser NmTerm
 abstraction = do
