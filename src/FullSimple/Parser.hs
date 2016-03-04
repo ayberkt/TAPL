@@ -7,7 +7,7 @@ import qualified Text.Parsec.Language          as L
 import qualified Text.Parsec.Token             as T
 import           Text.ParserCombinators.Parsec (Parser, alphaNum, chainl1,
                                                 letter, oneOf, parse)
-import           Typed.Semantics               (NmTerm (..), Ty (..))
+import           FullSimple.Semantics               (NmTerm (..), Ty (..))
 
 ------------
 -- LEXING --

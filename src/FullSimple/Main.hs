@@ -4,7 +4,7 @@ module Main where
 
 import           Control.Monad.Loops (whileM_)
 import           System.IO           (hFlush, hIsEOF, stdin, stdout)
-import           Typed.Parser        (parseExpr)
+import           FullSimple.Parser        (parseExpr)
 
 main ∷ IO ()
 main = do
