@@ -18,7 +18,7 @@ lexer = T.makeTokenParser
         $ L.emptyDef { T.identStart      = letter
                      , T.identLetter     = alphaNum
                      , T.reservedOpNames = ["lambda", ".", ":", "->"]
-                     , T.reservedNames   = ["true", "false", "Bool"]
+                     , T.reservedNames   = ["true", "false", "unit", "Bool"]
                      , T.opLetter        = oneOf ".:"
                      }
 
@@ -51,6 +51,9 @@ true = reserved "true" >> return NmTrue
 
 false ∷ Parser NmTerm
 false = reserved "false" >> return NmFalse
+
+unit ∷ Parser NmTerm
+unit = reserved "unit" >> return NmUnit
 
 bool ∷ Parser NmTerm
 bool = true <|> false
@@ -85,6 +88,9 @@ nonApp ∷ Parser NmTerm
 nonApp = parens expr
       <|> abstraction
       <|> variable
+      <|> true
+      <|> false
+      <|> unit
 
 expr ∷ Parser NmTerm
 expr = application <|> nonApp

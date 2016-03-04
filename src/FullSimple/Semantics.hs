@@ -7,6 +7,8 @@ import           Data.List (elemIndex)
 
 data Ty = TyArr Ty Ty
         | TyBool
+        | TyBase
+        | TyUnit
         deriving (Eq, Show)
 
 data Term = TmVar Int
@@ -14,6 +16,7 @@ data Term = TmVar Int
           | TmApp Term Term
           | TmTrue
           | TmFalse
+          | TmUnit
           | TmIf Term Term Term
           deriving (Eq, Show)
 
@@ -22,6 +25,7 @@ data NmTerm = NmVar String
             | NmApp NmTerm NmTerm
             | NmTrue
             | NmFalse
+            | NmUnit
             | NmIf NmTerm NmTerm NmTerm
             deriving (Eq, Show)
 
@@ -45,6 +49,7 @@ removeNames ctx (NmIf e1 e2 e3)
   = TmIf (removeNames ctx e1) (removeNames ctx e2) (removeNames ctx e3)
 removeNames _ NmTrue = TmTrue
 removeNames _ NmFalse = TmFalse
+removeNames _ NmUnit = TmUnit
 
 addBinding ∷ Context → String → Binding → Context
 addBinding ctx x bind = (x, bind) : ctx
@@ -83,6 +88,7 @@ typeOf ctx (TmIf t1 t2 t3)
   | otherwise = Left "Guard of conditional is not a boolean."
 typeOf _ TmTrue = Right TyBool
 typeOf _ TmFalse = Right TyBool
+typeOf _ TmUnit = Right TyUnit
 
 
 termShift ∷ Int → Term → Term
