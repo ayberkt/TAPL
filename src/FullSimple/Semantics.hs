@@ -6,6 +6,7 @@ import           Data.List (elemIndex)
 
 
 data Ty = TyArr Ty Ty
+        | TyProd Ty Ty
         | TyBool
         | TyBase
         | TyUnit
@@ -17,6 +18,7 @@ data Term = TmVar Int
           | TmTrue
           | TmFalse
           | TmUnit
+          | TmPair Term Term
           | TmIf Term Term Term
           deriving (Eq, Show)
 
