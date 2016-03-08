@@ -6,26 +6,28 @@ module FullSimple.Tokens (tokenize, Token(..)) where
 
 $digit = 0-9
 $alpha = [a-zA-z]
+$eol   = [\n]
 
 tokens :-
 
+  $eol                           ;
   $white+                        ;
   "--".*                         ;
-  lambda                         { \_ -> TokenLambda }
-  if                             { \_ -> TokenIf     }
-  then                           { \s -> TokenThen   }
-  else                           { \s -> TokenElse   }
-  .                              { \s -> TokenDot    }
-  :                              { \s -> TokenColon  }
-  true                           { \s -> TokenTrue   }
-  false                          { \s -> TokenFalse  }
-  unit                           { \s -> TokenUnit      }
-  Unit                           { \s -> TokenUnitType  }
-  Bool                           { \s -> TokenBoolType  }
-  "->"                           { \s -> TokenArrowType  }
-  \(                             { \s -> TokenLParen }
-  \)                             { \s -> TokenRParen }
-  $alpha+  { \s -> TokenSym s  }
+  lambda                         { \_ -> TokenLambda    }
+  if                             { \_ -> TokenIf        }
+  then                           { \_ -> TokenThen      }
+  else                           { \_ -> TokenElse      }
+  "."                            { \_ -> TokenDot       }
+  ":"                            { \_ -> TokenColon     }
+  true                           { \_ -> TokenTrue      }
+  false                          { \_ -> TokenFalse     }
+  unit                           { \_ -> TokenUnit      }
+  Unit                           { \_ -> TokenUnitType  }
+  Bool                           { \_ -> TokenBoolType  }
+  "->"                           { \s -> TokenArrowType }
+  \(                             { \s -> TokenLParen    }
+  \)                             { \s -> TokenRParen    }
+  $alpha  [$alpha $digit  \_ \']* { \s -> TokenSym s     }
 
 {
 

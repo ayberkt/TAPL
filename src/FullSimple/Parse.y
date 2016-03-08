@@ -30,16 +30,16 @@ import FullSimple.Semantics (NmTerm(..), Ty(..))
 
 Expr : if Expr then Expr else Expr        { NmIf  $2 $4 $6 }
      | lambda VAR ':' Type '.' Expr       { NmAbs $2 $4 $6 }
-     | Atom                               { $1             }
+     | Term                               { $1             }
 
-Term : Term Term                          { NmApp $1 $2    }
+Term : Term Atom                          { NmApp $1 $2    }
      | Atom                               { $1             }
 
 Atom   : '(' Expr ')'                     { $2             }
+       | VAR                              { NmVar $1       }
        | true                             { NmTrue         }
        | false                            { NmFalse        }
        | unit                             { NmUnit         }
-       | VAR                              { NmVar $1       }
 
 Type : Type '->' Type  { TyArr $1 $3 }
      | AtomicType      { $1          }
