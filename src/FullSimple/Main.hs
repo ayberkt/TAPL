@@ -7,25 +7,35 @@ import           FullSimple.Parse    (parseExpr)
 import           FullSimple.Semantics (Binding (NameBind), Context, Term (..),
                                        Ty (..), eval, removeNames, typeOf)
 import           System.IO            (hFlush, hIsEOF, stdin, stdout)
+import System.Environment (getArgs)
 
 
 main ∷ IO ()
 main = do
   putStr "λ "
   hFlush stdout
-  whileM_ (fmap not $ hIsEOF stdin) $ do
-    hFlush stdout
-    input ← getLine
-    let expr = removeNames [] (parseExpr input)
-    case typeOf [] expr of
-      Right τ → let expr' = eval [] expr
-                    exprWType = (exprToString [] $ expr')
-                                ++ " : " ++ typeToString τ
-                in putStrLn exprWType
-      Left  err  → putStrLn err
-    putStr "λ "
-    hFlush stdout
-  putStrLn "Bye."
+  args ← getArgs
+  case args of
+    [] → do whileM_ (fmap not $ hIsEOF stdin) $ do
+              hFlush stdout
+              input ← getLine
+              processExpr input
+              putStr "λ "
+              hFlush stdout
+            putStrLn "Bye."
+    [file] → do
+      input ← readFile file
+      processExpr input
+
+processExpr ∷ String → IO ()
+processExpr input = do
+  let expr = removeNames [] (parseExpr input)
+  case typeOf [] expr of
+    Right τ → let expr' = eval [] expr
+                  exprWType = (exprToString [] $ expr')
+                              ++ " : " ++ typeToString τ
+              in putStrLn exprWType
+    Left  err  → putStrLn err
 
 
 parens ∷ String → String
