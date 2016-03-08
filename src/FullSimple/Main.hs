@@ -3,7 +3,7 @@
 module Main where
 
 import           Control.Monad.Loops  (whileM_)
-import           FullSimple.Parser    (parseExpr)
+import           FullSimple.Parse    (parseExpr)
 import           FullSimple.Semantics (Binding (NameBind), Context, Term (..),
                                        Ty (..), eval, removeNames, typeOf)
 import           System.IO            (hFlush, hIsEOF, stdin, stdout)
