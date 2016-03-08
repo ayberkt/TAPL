@@ -25,6 +25,7 @@ tokens :-
   unit                            { \_ -> TokenUnit        }
   Unit                            { \_ -> TokenUnitType    }
   Bool                            { \_ -> TokenBoolType    }
+  Base                            { \_ -> TokenBaseType    }
   "->"                            { \_ -> TokenArrowType   }
   "*"                             { \_ -> TokenProductType }
   \(                              { \_ -> TokenLParen      }
@@ -45,6 +46,7 @@ data Token = TokenLambda
            | TokenUnit
            | TokenUnitType
            | TokenBoolType
+           | TokenBaseType
            | TokenArrowType
            | TokenProductType
            | TokenLParen

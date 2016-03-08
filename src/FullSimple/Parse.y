@@ -19,6 +19,7 @@ import FullSimple.Semantics (NmTerm(..), Ty(..))
     unit     { TokenUnit        }
     Bool     { TokenBoolType    }
     Unit     { TokenUnitType    }
+    Base     { TokenBaseType    }
     '->'     { TokenArrowType   }
     '*'      { TokenProductType }
     '.'      { TokenDot         }
@@ -50,6 +51,7 @@ Type : Type '->' Type  { TyArr  $1 $3 }
 
 AtomicType : Bool { TyBool }
            | Unit { TyUnit }
+           | Base { TyBase }
 
 {
 parseError :: [Token] -> a
