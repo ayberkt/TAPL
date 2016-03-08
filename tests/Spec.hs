@@ -210,3 +210,9 @@ testFullSimple = hspec $ do
                         (NmApp (NmVar "f") (NmVar "g"))
                         (NmVar "h"))
                        (NmVar "x")
+    let input9 = "(lambda x : Bool. lambda y : Bool. x) true false"
+    it ("correctly parses " ++ input9) $
+      FP.parseExpr input9
+      `shouldBe` let g = (NmAbs "y" TyBool (NmVar "x"))
+                     f = (NmAbs "x" TyBool g)
+                 in NmApp (NmApp f NmTrue) NmFalse
