@@ -20,6 +20,7 @@ tokens :-
   "."                             { \_ -> TokenDot         }
   ","                             { \_ -> TokenComma       }
   ":"                             { \_ -> TokenColon       }
+  ";"                             { \_ -> TokenSequence    }
   true                            { \_ -> TokenTrue        }
   false                           { \_ -> TokenFalse       }
   unit                            { \_ -> TokenUnit        }
@@ -41,6 +42,7 @@ data Token = TokenLambda
            | TokenDot
            | TokenComma
            | TokenColon
+           | TokenSequence
            | TokenTrue
            | TokenFalse
            | TokenUnit

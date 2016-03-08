@@ -20,6 +20,7 @@ data Term = TmVar Int
           | TmUnit
           | TmPair Term Term
           | TmIf Term Term Term
+          | TmSeq Term Term
           deriving (Eq, Show)
 
 data NmTerm = NmVar String
@@ -30,6 +31,7 @@ data NmTerm = NmVar String
             | NmUnit
             | NmPair NmTerm NmTerm
             | NmIf NmTerm NmTerm NmTerm
+            | NmSeq NmTerm NmTerm
             deriving (Eq, Show)
 
 data Binding = NameBind
@@ -50,6 +52,8 @@ removeNames ctx (NmApp e1 e2)
   = TmApp (removeNames ctx e1) (removeNames ctx e2)
 removeNames ctx (NmIf e1 e2 e3)
   = TmIf (removeNames ctx e1) (removeNames ctx e2) (removeNames ctx e3)
+removeNames ctx (NmSeq e1 e2)
+  = TmSeq (removeNames ctx e1) (removeNames ctx e2)
 removeNames ctx (NmPair t1 t2) = TmPair (removeNames ctx t1) (removeNames ctx t2)
 removeNames _ NmTrue = TmTrue
 removeNames _ NmFalse = TmFalse
@@ -95,6 +99,7 @@ typeOf ctx (TmPair t1 t2)
     in case (ty1, ty2) of
          (Right τ1, Right τ2) → Right $ TyProd τ1 τ2
          (_, _) → Left "Type mismatch."
+typeOf ctx (TmSeq _ t2) = typeOf ctx t2
 typeOf _ TmTrue = Right TyBool
 typeOf _ TmFalse = Right TyBool
 typeOf _ TmUnit = Right TyUnit
@@ -143,6 +148,9 @@ eval ctx (TmApp t1 t2)
       _ → if isVal t1
           then let t2' = eval ctx t2 in (TmApp t1 t2')
           else let t1' = eval ctx t1 in (TmApp t1' t2)
+eval ctx (TmSeq t1 t2)
+  = let _ = eval ctx t1
+    in eval ctx t2
 eval _ (TmIf TmTrue t2  _) = t2
 eval _ (TmIf TmFalse _ t3) = t3
 eval ctx (TmIf t1 t2 t3)

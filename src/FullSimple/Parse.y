@@ -24,6 +24,7 @@ import FullSimple.Semantics (NmTerm(..), Ty(..))
     '*'      { TokenProductType }
     '.'      { TokenDot         }
     ','      { TokenComma       }
+    ';'      { TokenSequence    }
     ':'      { TokenColon       }
     '('      { TokenLParen      }
     ')'      { TokenRParen      }
@@ -36,11 +37,16 @@ Expr : if Expr then Expr else Expr        { NmIf  $2 $4 $6 }
      | Term                               { $1             }
 
 Term : Term Atom                          { NmApp $1 $2    }
+     | Sequence                           { $1             }
+
+Sequence : Sequence ';' Atom              { NmSeq $1 $3    }
+         | Pair                           { $1             }
+
+Pair : '(' Expr ',' Expr ')'              { NmPair $2 $4   }
      | Atom                               { $1             }
 
 Atom   : '(' Expr ')'                     { $2             }
-       | VAR                              { NmVar $1       }
-       | '(' Expr ',' Expr ')'            { NmPair $2 $4   }
+       | VAR                              { NmVar  $1      }
        | true                             { NmTrue         }
        | false                            { NmFalse        }
        | unit                             { NmUnit         }
