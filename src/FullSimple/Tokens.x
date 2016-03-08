@@ -10,25 +10,26 @@ $eol   = [\n]
 
 tokens :-
 
-  $eol                           ;
-  $white+                        ;
-  "--".*                         ;
-  lambda                         { \_ -> TokenLambda      }
-  if                             { \_ -> TokenIf          }
-  then                           { \_ -> TokenThen        }
-  else                           { \_ -> TokenElse        }
-  "."                            { \_ -> TokenDot         }
-  ":"                            { \_ -> TokenColon       }
-  true                           { \_ -> TokenTrue        }
-  false                          { \_ -> TokenFalse       }
-  unit                           { \_ -> TokenUnit        }
-  Unit                           { \_ -> TokenUnitType    }
-  Bool                           { \_ -> TokenBoolType    }
-  "->"                           { \s -> TokenArrowType   }
-  "*"                            { \_ -> TokenProductType }
-  \(                             { \s -> TokenLParen      }
-  \)                             { \s -> TokenRParen      }
-  $alpha  [$alpha $digit  \_ \']* { \s -> TokenSym s      }
+  $eol                             ;
+  $white+                         ;
+  "--".*                          ;
+  lambda                          { \_ -> TokenLambda      }
+  if                              { \_ -> TokenIf          }
+  then                            { \_ -> TokenThen        }
+  else                            { \_ -> TokenElse        }
+  "."                             { \_ -> TokenDot         }
+  ","                             { \_ -> TokenComma       }
+  ":"                             { \_ -> TokenColon       }
+  true                            { \_ -> TokenTrue        }
+  false                           { \_ -> TokenFalse       }
+  unit                            { \_ -> TokenUnit        }
+  Unit                            { \_ -> TokenUnitType    }
+  Bool                            { \_ -> TokenBoolType    }
+  "->"                            { \_ -> TokenArrowType   }
+  "*"                             { \_ -> TokenProductType }
+  \(                              { \_ -> TokenLParen      }
+  \)                              { \_ -> TokenRParen      }
+  $alpha  [$alpha $digit  \_ \']* { \s -> TokenSym s       }
 
 {
 
@@ -37,6 +38,7 @@ data Token = TokenLambda
            | TokenThen
            | TokenElse
            | TokenDot
+           | TokenComma
            | TokenColon
            | TokenTrue
            | TokenFalse

@@ -22,6 +22,7 @@ import FullSimple.Semantics (NmTerm(..), Ty(..))
     '->'     { TokenArrowType   }
     '*'      { TokenProductType }
     '.'      { TokenDot         }
+    ','      { TokenComma       }
     ':'      { TokenColon       }
     '('      { TokenLParen      }
     ')'      { TokenRParen      }
@@ -38,6 +39,7 @@ Term : Term Atom                          { NmApp $1 $2    }
 
 Atom   : '(' Expr ')'                     { $2             }
        | VAR                              { NmVar $1       }
+       | '(' Expr ',' Expr ')'            { NmPair $2 $4   }
        | true                             { NmTrue         }
        | false                            { NmFalse        }
        | unit                             { NmUnit         }
