@@ -7,3 +7,5 @@ _site
 .sass-cache
 typed.sh
 TAGS
+src/FullSimple/Parse.hs
+src/FullSimple/Tokens.hs
