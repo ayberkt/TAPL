@@ -9,21 +9,22 @@ import FullSimple.Semantics (NmTerm(..), Ty(..))
 %error     { parseError }
 
 %token
-    if       { TokenIf        }
-    then     { TokenThen      }
-    else     { TokenElse      }
-    VAR      { TokenSym $$    }
-    lambda   { TokenLambda    }
-    true     { TokenTrue      }
-    false    { TokenFalse     }
-    unit     { TokenUnit      }
-    Bool     { TokenBoolType  }
-    Unit     { TokenUnitType  }
-    '->'     { TokenArrowType }
-    '.'      { TokenDot       }
-    ':'      { TokenColon     }
-    '('      { TokenLParen    }
-    ')'      { TokenRParen    }
+    if       { TokenIf          }
+    then     { TokenThen        }
+    else     { TokenElse        }
+    VAR      { TokenSym $$      }
+    lambda   { TokenLambda      }
+    true     { TokenTrue        }
+    false    { TokenFalse       }
+    unit     { TokenUnit        }
+    Bool     { TokenBoolType    }
+    Unit     { TokenUnitType    }
+    '->'     { TokenArrowType   }
+    '*'      { TokenProductType }
+    '.'      { TokenDot         }
+    ':'      { TokenColon       }
+    '('      { TokenLParen      }
+    ')'      { TokenRParen      }
 
 %left  '->'
 %%
@@ -41,8 +42,9 @@ Atom   : '(' Expr ')'                     { $2             }
        | false                            { NmFalse        }
        | unit                             { NmUnit         }
 
-Type : Type '->' Type  { TyArr $1 $3 }
-     | AtomicType      { $1          }
+Type : Type '->' Type  { TyArr  $1 $3 }
+     | Type '*'  Type  { TyProd $1 $3 }
+     | AtomicType      { $1           }
 
 AtomicType : Bool { TyBool }
            | Unit { TyUnit }

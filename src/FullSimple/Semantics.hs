@@ -28,6 +28,7 @@ data NmTerm = NmVar String
             | NmTrue
             | NmFalse
             | NmUnit
+            | NmPair NmTerm NmTerm
             | NmIf NmTerm NmTerm NmTerm
             deriving (Eq, Show)
 
@@ -49,6 +50,7 @@ removeNames ctx (NmApp e1 e2)
   = TmApp (removeNames ctx e1) (removeNames ctx e2)
 removeNames ctx (NmIf e1 e2 e3)
   = TmIf (removeNames ctx e1) (removeNames ctx e2) (removeNames ctx e3)
+removeNames ctx (NmPair t1 t2) = TmPair (removeNames ctx t1) (removeNames ctx t2)
 removeNames _ NmTrue = TmTrue
 removeNames _ NmFalse = TmFalse
 removeNames _ NmUnit = TmUnit
@@ -88,6 +90,11 @@ typeOf ctx (TmIf t1 t2 t3)
            then τ2
            else Left "Arms of conditional have different types."
   | otherwise = Left "Guard of conditional is not a boolean."
+typeOf ctx (TmPair t1 t2)
+  = let (ty1, ty2) = (typeOf ctx t1, typeOf ctx t2)
+    in case (ty1, ty2) of
+         (Right τ1, Right τ2) → Right $ TyProd τ1 τ2
+         (_, _) → Left "Type mismatch."
 typeOf _ TmTrue = Right TyBool
 typeOf _ TmFalse = Right TyBool
 typeOf _ TmUnit = Right TyUnit

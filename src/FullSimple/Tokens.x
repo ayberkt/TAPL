@@ -13,21 +13,22 @@ tokens :-
   $eol                           ;
   $white+                        ;
   "--".*                         ;
-  lambda                         { \_ -> TokenLambda    }
-  if                             { \_ -> TokenIf        }
-  then                           { \_ -> TokenThen      }
-  else                           { \_ -> TokenElse      }
-  "."                            { \_ -> TokenDot       }
-  ":"                            { \_ -> TokenColon     }
-  true                           { \_ -> TokenTrue      }
-  false                          { \_ -> TokenFalse     }
-  unit                           { \_ -> TokenUnit      }
-  Unit                           { \_ -> TokenUnitType  }
-  Bool                           { \_ -> TokenBoolType  }
-  "->"                           { \s -> TokenArrowType }
-  \(                             { \s -> TokenLParen    }
-  \)                             { \s -> TokenRParen    }
-  $alpha  [$alpha $digit  \_ \']* { \s -> TokenSym s     }
+  lambda                         { \_ -> TokenLambda      }
+  if                             { \_ -> TokenIf          }
+  then                           { \_ -> TokenThen        }
+  else                           { \_ -> TokenElse        }
+  "."                            { \_ -> TokenDot         }
+  ":"                            { \_ -> TokenColon       }
+  true                           { \_ -> TokenTrue        }
+  false                          { \_ -> TokenFalse       }
+  unit                           { \_ -> TokenUnit        }
+  Unit                           { \_ -> TokenUnitType    }
+  Bool                           { \_ -> TokenBoolType    }
+  "->"                           { \s -> TokenArrowType   }
+  "*"                            { \_ -> TokenProductType }
+  \(                             { \s -> TokenLParen      }
+  \)                             { \s -> TokenRParen      }
+  $alpha  [$alpha $digit  \_ \']* { \s -> TokenSym s      }
 
 {
 
@@ -43,6 +44,7 @@ data Token = TokenLambda
            | TokenUnitType
            | TokenBoolType
            | TokenArrowType
+           | TokenProductType
            | TokenLParen
            | TokenRParen
            | TokenSym String

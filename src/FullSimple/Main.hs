@@ -34,6 +34,8 @@ parens s = "(" ++ s ++ ")"
 typeToString ∷ Ty → String
 typeToString (TyArr τ1 τ2)
   = typeToString τ1 ++ " → " ++ typeToString τ2
+typeToString (TyProd τ1 τ2)
+  = typeToString τ1 ++ " * " ++ typeToString τ2
 typeToString TyBool = "Bool"
 typeToString TyUnit = "Unit"
 typeToString TyBase = "Base"
@@ -70,3 +72,5 @@ exprToString ctx (TmIf t1 t2 t3)
     in "if " ++ t1str ++
        " then " ++ t2str ++
        " else " ++ t3str
+exprToString ctx (TmPair t1 t2)
+  = "(" ++ (exprToString ctx t1) ++ ", " ++ (exprToString ctx t2) ++ ")"
