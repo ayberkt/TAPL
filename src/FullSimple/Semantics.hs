@@ -128,12 +128,11 @@ termSubstTop ∷ Term → Term → Term
 termSubstTop s t = termShift (-1) (termSubst 0 (termShift 1 s) t)
 
 isVal ∷ Term → Bool
-isVal TmTrue = True
-isVal TmFalse = True
-isVal TmUnit = True
-isVal (TmAbs _ _ _) = True
-isVal (TmVar _) = True
-isVal (TmPair _ _) = True
+isVal TmTrue        = True
+isVal TmFalse       = True
+isVal TmUnit        = True
+isVal (TmVar _)     = True
+isVal (TmPair _ _)  = True
 isVal _ = False
 
 eval ∷ Context → Term → Term

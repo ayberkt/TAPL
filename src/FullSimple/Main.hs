@@ -12,11 +12,11 @@ import System.Environment (getArgs)
 
 main ∷ IO ()
 main = do
-  putStr "λ "
-  hFlush stdout
   args ← getArgs
   case args of
-    [] → do whileM_ (fmap not $ hIsEOF stdin) $ do
+    [] → do putStr "λ "
+            hFlush stdout
+            whileM_ (fmap not $ hIsEOF stdin) $ do
               hFlush stdout
               input ← getLine
               processExpr input
@@ -82,5 +82,7 @@ exprToString ctx (TmIf t1 t2 t3)
     in "if " ++ t1str ++
        " then " ++ t2str ++
        " else " ++ t3str
+exprToString ctx (TmSeq _ t2)
+  = exprToString ctx t2
 exprToString ctx (TmPair t1 t2)
   = "(" ++ (exprToString ctx t1) ++ ", " ++ (exprToString ctx t2) ++ ")"

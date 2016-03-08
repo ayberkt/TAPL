@@ -52,8 +52,10 @@ Atom   : '(' Expr ')'                     { $2             }
        | unit                             { NmUnit         }
 
 Type : Type '->' Type  { TyArr  $1 $3 }
-     | Type '*'  Type  { TyProd $1 $3 }
-     | AtomicType      { $1           }
+     | Type_           { $1           }
+
+Type_ : Type_ '*' Type_ { TyProd $1 $3 }
+      | AtomicType                  { $1           }
 
 AtomicType : Bool { TyBool }
            | Unit { TyUnit }
