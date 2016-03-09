@@ -17,6 +17,7 @@ tokens :-
   if                              { \_ -> TokenIf          }
   then                            { \_ -> TokenThen        }
   else                            { \_ -> TokenElse        }
+  as                              { \_ -> TokenAs          }
   "."                             { \_ -> TokenDot         }
   ","                             { \_ -> TokenComma       }
   ":"                             { \_ -> TokenColon       }
@@ -39,6 +40,7 @@ data Token = TokenLambda
            | TokenIf
            | TokenThen
            | TokenElse
+           | TokenAs
            | TokenDot
            | TokenComma
            | TokenColon

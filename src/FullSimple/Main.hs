@@ -86,3 +86,4 @@ exprToString ctx (TmSeq _ t2)
   = exprToString ctx t2
 exprToString ctx (TmPair t1 t2)
   = "(" ++ (exprToString ctx t1) ++ ", " ++ (exprToString ctx t2) ++ ")"
+exprToString ctx (TmAscribe t _) = exprToString ctx t

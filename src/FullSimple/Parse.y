@@ -16,6 +16,7 @@ import FullSimple.Semantics (NmTerm(..), Ty(..))
     lambda   { TokenLambda      }
     true     { TokenTrue        }
     false    { TokenFalse       }
+    as       { TokenAs          }
     unit     { TokenUnit        }
     Bool     { TokenBoolType    }
     Unit     { TokenUnitType    }
@@ -32,30 +33,31 @@ import FullSimple.Semantics (NmTerm(..), Ty(..))
 %left  '->'
 %%
 
-Expr : if Expr then Expr else Expr        { NmIf  $2 $4 $6 }
-     | lambda VAR ':' Type '.' Expr       { NmAbs $2 $4 $6 }
-     | Term                               { $1             }
+Expr : if Expr then Expr else Expr        { NmIf  $2 $4 $6  }
+     | lambda VAR ':' Type '.' Expr       { NmAbs $2 $4 $6  }
+     | Term                               { $1              }
 
-Term : Term Atom                          { NmApp $1 $2    }
-     | Sequence                           { $1             }
+Term : Term Atom                          { NmApp $1 $2     }
+     | Term as Type                       { NmAscribe $1 $3 }
+     | Sequence                           { $1              }
 
-Sequence : Sequence ';' Atom              { NmSeq $1 $3    }
-         | Pair                           { $1             }
+Sequence : Sequence ';' Atom              { NmSeq $1 $3     }
+         | Pair                           { $1              }
 
-Pair : '(' Expr ',' Expr ')'              { NmPair $2 $4   }
-     | Atom                               { $1             }
+Pair : '(' Expr ',' Expr ')'              { NmPair $2 $4    }
+     | Atom                               { $1              }
 
-Atom   : '(' Expr ')'                     { $2             }
-       | VAR                              { NmVar  $1      }
-       | true                             { NmTrue         }
-       | false                            { NmFalse        }
-       | unit                             { NmUnit         }
+Atom   : '(' Expr ')'                     { $2              }
+       | VAR                              { NmVar  $1       }
+       | true                             { NmTrue          }
+       | false                            { NmFalse         }
+       | unit                             { NmUnit          }
 
 Type : Type '->' Type  { TyArr  $1 $3 }
      | Type_           { $1           }
 
 Type_ : Type_ '*' Type_ { TyProd $1 $3 }
-      | AtomicType                  { $1           }
+      | AtomicType      { $1           }
 
 AtomicType : Bool { TyBool }
            | Unit { TyUnit }

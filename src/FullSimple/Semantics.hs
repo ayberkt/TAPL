@@ -18,6 +18,7 @@ data Term = TmVar Int
           | TmTrue
           | TmFalse
           | TmUnit
+          | TmAscribe Term Ty
           | TmPair Term Term
           | TmIf Term Term Term
           | TmSeq Term Term
@@ -29,6 +30,7 @@ data NmTerm = NmVar String
             | NmTrue
             | NmFalse
             | NmUnit
+            | NmAscribe NmTerm Ty
             | NmPair NmTerm NmTerm
             | NmIf NmTerm NmTerm NmTerm
             | NmSeq NmTerm NmTerm
@@ -55,6 +57,7 @@ removeNames ctx (NmIf e1 e2 e3)
 removeNames ctx (NmSeq e1 e2)
   = TmSeq (removeNames ctx e1) (removeNames ctx e2)
 removeNames ctx (NmPair t1 t2) = TmPair (removeNames ctx t1) (removeNames ctx t2)
+removeNames ctx (NmAscribe t τ) = TmAscribe (removeNames ctx t) τ
 removeNames _ NmTrue = TmTrue
 removeNames _ NmFalse = TmFalse
 removeNames _ NmUnit = TmUnit
@@ -99,6 +102,9 @@ typeOf ctx (TmPair t1 t2)
     in case (ty1, ty2) of
          (Right τ1, Right τ2) → Right $ TyProd τ1 τ2
          (_, _) → Left "Type mismatch."
+typeOf ctx (TmAscribe t τ)
+  | let Right τ' = typeOf ctx t in τ' == τ = Right τ
+  | otherwise = Left "Cannot ascribe type."
 typeOf ctx (TmSeq _ t2) = typeOf ctx t2
 typeOf _ TmTrue = Right TyBool
 typeOf _ TmFalse = Right TyBool
@@ -132,7 +138,7 @@ isVal TmTrue        = True
 isVal TmFalse       = True
 isVal TmUnit        = True
 isVal (TmVar _)     = True
-isVal (TmPair _ _)  = True
+-- isVal (TmPair _ _)  = True
 isVal _ = False
 
 eval ∷ Context → Term → Term
@@ -155,4 +161,8 @@ eval _ (TmIf TmFalse _ t3) = t3
 eval ctx (TmIf t1 t2 t3)
   = let t1' = eval ctx t1
     in TmIf t1' t2 t3
+eval ctx (TmPair t1 t2) = TmPair (eval ctx t1) (eval ctx t2)
+eval ctx (TmAscribe t τ)
+  | isVal t = t
+  | otherwise = eval ctx t
 eval _ t = t
