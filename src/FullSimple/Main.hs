@@ -75,15 +75,9 @@ exprToString _ TmTrue
 exprToString _ TmFalse
   = "false"
 exprToString _ TmUnit = "unit"
-exprToString ctx (TmIf t1 t2 t3)
-  = let t1str = exprToString ctx t1
-        t2str = exprToString ctx t2
-        t3str = exprToString ctx t3
-    in "if " ++ t1str ++
-       " then " ++ t2str ++
-       " else " ++ t3str
 exprToString ctx (TmSeq _ t2)
   = exprToString ctx t2
 exprToString ctx (TmPair t1 t2)
   = "(" ++ (exprToString ctx t1) ++ ", " ++ (exprToString ctx t2) ++ ")"
 exprToString ctx (TmAscribe t _) = exprToString ctx t
+exprToString _ _ = error "Cannot print non-normal form."

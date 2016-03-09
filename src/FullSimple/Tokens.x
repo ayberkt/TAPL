@@ -18,6 +18,9 @@ tokens :-
   then                            { \_ -> TokenThen        }
   else                            { \_ -> TokenElse        }
   as                              { \_ -> TokenAs          }
+  let                             { \_ -> TokenLet         }
+  in                              { \_ -> TokenIn          }
+  "="                             { \_ -> TokenEq          }
   "."                             { \_ -> TokenDot         }
   ","                             { \_ -> TokenComma       }
   ":"                             { \_ -> TokenColon       }
@@ -41,6 +44,9 @@ data Token = TokenLambda
            | TokenThen
            | TokenElse
            | TokenAs
+           | TokenLet
+           | TokenIn
+           | TokenEq
            | TokenDot
            | TokenComma
            | TokenColon

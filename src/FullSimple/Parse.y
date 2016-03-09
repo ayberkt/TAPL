@@ -17,6 +17,9 @@ import FullSimple.Semantics (NmTerm(..), Ty(..))
     true     { TokenTrue        }
     false    { TokenFalse       }
     as       { TokenAs          }
+    let      { TokenLet         }
+    in       { TokenIn          }
+    '='      { TokenEq          }
     unit     { TokenUnit        }
     Bool     { TokenBoolType    }
     Unit     { TokenUnitType    }
@@ -35,6 +38,7 @@ import FullSimple.Semantics (NmTerm(..), Ty(..))
 
 Expr : if Expr then Expr else Expr        { NmIf  $2 $4 $6  }
      | lambda VAR ':' Type '.' Expr       { NmAbs $2 $4 $6  }
+     | let VAR '=' Term in Term           { NmLet $2 $4 $6  }
      | Term                               { $1              }
 
 Term : Term Atom                          { NmApp $1 $2     }

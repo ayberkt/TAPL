@@ -3,6 +3,7 @@
 module FullSimple.Semantics where
 
 import           Data.List (elemIndex)
+import Debug.Trace (trace)
 
 
 data Ty = TyArr Ty Ty
@@ -19,6 +20,7 @@ data Term = TmVar Int
           | TmFalse
           | TmUnit
           | TmAscribe Term Ty
+          | TmLet String Term Term
           | TmPair Term Term
           | TmIf Term Term Term
           | TmSeq Term Term
@@ -31,6 +33,7 @@ data NmTerm = NmVar String
             | NmFalse
             | NmUnit
             | NmAscribe NmTerm Ty
+            | NmLet String NmTerm NmTerm
             | NmPair NmTerm NmTerm
             | NmIf NmTerm NmTerm NmTerm
             | NmSeq NmTerm NmTerm
@@ -56,8 +59,12 @@ removeNames ctx (NmIf e1 e2 e3)
   = TmIf (removeNames ctx e1) (removeNames ctx e2) (removeNames ctx e3)
 removeNames ctx (NmSeq e1 e2)
   = TmSeq (removeNames ctx e1) (removeNames ctx e2)
-removeNames ctx (NmPair t1 t2) = TmPair (removeNames ctx t1) (removeNames ctx t2)
-removeNames ctx (NmAscribe t τ) = TmAscribe (removeNames ctx t) τ
+removeNames ctx (NmPair t1 t2)
+  = TmPair (removeNames ctx t1) (removeNames ctx t2)
+removeNames ctx (NmAscribe t τ)
+  = TmAscribe (removeNames ctx t) τ
+removeNames ctx (NmLet x t1 t2)
+  = TmLet x (removeNames ctx t1) (removeNames ((x, NameBind) : ctx) t2)
 removeNames _ NmTrue = TmTrue
 removeNames _ NmFalse = TmFalse
 removeNames _ NmUnit = TmUnit
@@ -105,6 +112,11 @@ typeOf ctx (TmPair t1 t2)
 typeOf ctx (TmAscribe t τ)
   | let Right τ' = typeOf ctx t in τ' == τ = Right τ
   | otherwise = Left "Cannot ascribe type."
+typeOf ctx (TmLet x t1 t2)
+  = let ty1 = typeOf ctx t1
+        ty2 = case ty1 of Right τ1 → typeOf ((x, VarBind τ1) : ctx) t2
+                          Left err → Left err
+    in ty2
 typeOf ctx (TmSeq _ t2) = typeOf ctx t2
 typeOf _ TmTrue = Right TyBool
 typeOf _ TmFalse = Right TyBool
@@ -148,21 +160,27 @@ eval ctx (TmApp t1 t2)
         → if isVal t2
           then termSubstTop t2 t1_2
           else if isVal t1
-               then let t2' = eval ctx t2 in (TmApp t1 t2')
-               else let t1' = eval ctx t1 in (TmApp t1' t2)
+               then let t2' = eval ctx t2 in eval ctx (TmApp t1 t2')
+               else let t1' = eval ctx t1 in eval ctx (TmApp t1' t2)
       _ → if isVal t1
-          then let t2' = eval ctx t2 in (TmApp t1 t2')
-          else let t1' = eval ctx t1 in (TmApp t1' t2)
+          then let t2' = eval ctx t2 in eval ctx (TmApp t1 t2')
+          else let t1' = eval ctx t1 in eval ctx (TmApp t1' t2)
 eval ctx (TmSeq t1 t2)
   = let _ = eval ctx t1
     in eval ctx t2
-eval _ (TmIf TmTrue t2  _) = t2
-eval _ (TmIf TmFalse _ t3) = t3
+eval ctx (TmIf TmTrue t2  _) = eval ctx t2
+eval ctx (TmIf TmFalse _ t3) = eval ctx t3
 eval ctx (TmIf t1 t2 t3)
   = let t1' = eval ctx t1
-    in TmIf t1' t2 t3
-eval ctx (TmPair t1 t2) = TmPair (eval ctx t1) (eval ctx t2)
-eval ctx (TmAscribe t τ)
+    in eval ctx $ TmIf t1' t2 t3
+eval ctx (TmPair t1 t2)
+  = TmPair (eval ctx t1) (eval ctx t2)
+eval ctx (TmAscribe t _)
   | isVal t = t
   | otherwise = eval ctx t
+eval ctx (TmLet x t1 t2)
+  | isVal t1 = let Right τ = typeOf ctx t1
+               in  eval ctx $ TmApp (TmAbs x τ t2) t1
+  | otherwise = let t1' = eval ctx t1
+                in eval ctx (TmLet x t1' t2)
 eval _ t = t
